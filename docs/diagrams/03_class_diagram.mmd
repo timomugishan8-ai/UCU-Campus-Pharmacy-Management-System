@@ -1,0 +1,68 @@
+classDiagram
+    class Medicine {
+      <<abstract>>
+      -str medicine_code
+      -str name
+      -float unit_price
+      -int reorder_level
+      +requires_prescriber_code() bool
+    }
+    class OrdinaryMedicine {
+      +requires_prescriber_code() bool
+    }
+    class ControlledMedicine {
+      +requires_prescriber_code() bool
+    }
+    class Branch {
+      -int branch_id
+      -str branch_name
+    }
+    class Stock {
+      -str medicine_code
+      -int branch_id
+      -int quantity
+      +receive(quantity)
+      +can_fulfil(quantity) bool
+      +decrease(quantity)
+    }
+    class Prescription {
+      -int prescription_id
+      -str patient_identifier
+      -int branch_id
+      -str prescriber_code
+      -str status
+      -datetime created_at
+      -datetime dispensed_at
+      +can_dispense() bool
+      +mark_dispensed()
+      +mark_cancelled()
+      +add_line(line)
+      +requires_authorised_prescriber(medicines) bool
+    }
+    class PrescriptionLine {
+      -int line_id
+      -int prescription_id
+      -str medicine_code
+      -int quantity
+    }
+    class MedicineService
+    class StockService
+    class PrescriptionService
+    class ReportService
+    class ApplicationServices
+
+    Medicine <|-- OrdinaryMedicine
+    Medicine <|-- ControlledMedicine
+    Branch "1" --> "0..*" Stock : has
+    Medicine "1" --> "0..*" Stock : stocked as
+    Prescription "1" *-- "1..*" PrescriptionLine : contains
+    Medicine "1" --> "0..*" PrescriptionLine : referenced by
+
+    ApplicationServices o-- MedicineService
+    ApplicationServices o-- StockService
+    ApplicationServices o-- PrescriptionService
+    ApplicationServices o-- ReportService
+
+    note for Medicine "Shared medicine data and validation; subclasses override requires_prescriber_code()."
+    note for PrescriptionService "Coordinates one atomic dispensing transaction through repositories."
+    note for Stock "Quantity is branch-specific and must remain a non-negative integer."

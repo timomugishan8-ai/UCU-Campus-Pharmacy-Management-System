@@ -1,0 +1,42 @@
+erDiagram
+    MEDICINES {
+      TEXT medicine_code PK
+      TEXT name
+      REAL unit_price
+      INTEGER reorder_level
+      INTEGER is_controlled
+    }
+    BRANCHES {
+      INTEGER branch_id PK
+      TEXT branch_name UK
+    }
+    STOCK {
+      TEXT medicine_code PK, FK
+      INTEGER branch_id PK, FK
+      INTEGER quantity
+    }
+    PRESCRIPTIONS {
+      INTEGER prescription_id PK
+      INTEGER branch_id FK
+      TEXT patient_identifier
+      TEXT status
+      TEXT prescriber_code
+      TEXT created_at
+      TEXT dispensed_at
+    }
+    PRESCRIPTION_LINES {
+      INTEGER line_id PK
+      INTEGER prescription_id FK
+      TEXT medicine_code FK
+      INTEGER quantity
+    }
+    AUTHORISED_PRESCRIBERS {
+      TEXT prescriber_code PK
+      TEXT prescriber_name
+    }
+
+    MEDICINES ||--o{ STOCK : "stocked as"
+    BRANCHES ||--o{ STOCK : "holds"
+    BRANCHES ||--o{ PRESCRIPTIONS : "receives"
+    PRESCRIPTIONS ||--|{ PRESCRIPTION_LINES : "contains"
+    MEDICINES ||--o{ PRESCRIPTION_LINES : "prescribed"

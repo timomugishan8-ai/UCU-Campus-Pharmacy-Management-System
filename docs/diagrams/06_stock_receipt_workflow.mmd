@@ -1,0 +1,11 @@
+flowchart TD
+    A([Attendant opens receive-stock screen]) --> B[Select medicine and branch]
+    B --> C[Enter receipt quantity]
+    C --> D[GUI converts basic input values]
+    D --> E[StockService validates positive integer quantity]
+    E --> F{Medicine and branch exist?}
+    F -- No --> G[Return meaningful error]
+    F -- Yes --> H[StockRepository persists branch-specific receipt]
+    H --> I[GUI displays success and refreshes branch stock]
+    G --> J([Correct input / try again])
+    I --> K([Complete])
