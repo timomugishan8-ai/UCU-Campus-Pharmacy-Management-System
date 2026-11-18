@@ -70,9 +70,56 @@ This is a five-member group project (CSC2105). Placeholders - to be filled in wi
 
 - **Member 1:** (to be assigned)
 - **Member 2:** (to be assigned)
-- **Member 3:** (to be assigned)
+- **Member 3:** Conrad - Prescription and dispensing owner (prescription domain, prescription service, create/dispense screens and their tests).
 - **Member 4:** (to be assigned)
 - **Member 5:** Database development, repositories, selected services, testing coordination and documentation.
+
+### 5.1 Member 3 contribution - Prescription and dispensing (Conrad)
+
+This section was added by Member 3. It describes only the prescription and dispensing part; Member 5 owns the rest of this README.
+
+**Files owned by Member 3**
+
+- `domain/prescription.py` - `Prescription`, `PrescriptionLine`, status constants, valid transitions and prescription exceptions.
+- `services/prescription_service.py` - the agreed public service methods and the dispensing transaction.
+- `gui/create_prescription.py` - `CreatePrescriptionScreen(parent, services)`.
+- `gui/dispense.py` - `DispenseScreen(parent, services)`.
+- `tests/test_prescription.py` and `tests/test_dispensing.py` - 23 tests for this feature.
+- `database/repositories/prescriber_repository.py` - new allow-list lookup (needs Member 5 review because Member 5 owns the database folder).
+
+**What is implemented**
+
+- Multi-line prescriptions tied to one branch and a fictional patient identifier.
+- `pending`, `dispensed` and `cancelled` statuses; only pending prescriptions can dispense or cancel.
+- Controlled medicines require an authorised simulated prescriber code; ordinary medicines do not.
+- All-or-nothing dispensing: one SQLite transaction (`BEGIN IMMEDIATE`) covers status checks, controlled-medicine authorisation, stock checks, conditional stock reductions and the conditional status update. If any step fails, everything rolls back and no stock is deducted.
+
+**Agreed public methods**
+
+```python
+PrescriptionService(prescription_repository, medicine_repository, stock_repository)
+
+create_prescription(patient_identifier, branch_id, prescriber_code, lines) -> Prescription
+dispense_prescription(prescription_id) -> Prescription
+cancel_prescription(prescription_id) -> Prescription
+get_prescription(prescription_id) -> Prescription | None
+```
+
+The prescriber and branch repositories are built automatically from the shared `Database`, so `app/services.py` only needs the three repository arguments above. The return format (`Prescription` object) should be confirmed with Members 1, 4 and 5 during integration.
+
+**Tests**
+
+```powershell
+py -m unittest tests.test_prescription tests.test_dispensing -v
+```
+
+All 23 Member 3 tests pass; the whole suite (`py -m unittest discover -s tests -v`) passes 31 tests. Tests use temporary databases, never the live `data/pharmacy.db`.
+
+**Integration notes**
+
+- The group agreement did not name a repository for `authorised_prescribers`. `PrescriberRepository.is_authorised(code, conn=None)` was added so the allow-list check stays in the repository layer and joins the dispensing transaction.
+- The two screens use the shared services object and contain no SQL.
+- Branch: `member-3-prescriptions`.
 
 ## 6. Prerequisites
 
@@ -140,13 +187,11 @@ The entry point and GUI are not implemented yet.
 
 ## 11. How to run tests
 
-(To be completed during development)
-
 ```powershell
 python -m unittest discover -s tests
 ```
 
-Test suites are not implemented yet.
+Member 5's database tests and Member 3's prescription/dispensing tests are implemented (31 tests pass). Other members' suites are still being added.
 
 ## 12. Git collaboration workflow
 
