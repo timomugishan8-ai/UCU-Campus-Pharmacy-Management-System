@@ -92,15 +92,14 @@ class LowStockScreen(ttk.Frame):
         self._load_branch_options()
 
     def _load_branch_options(self) -> None:
-        """Build the branch dropdown from data the report already returns.
+        """Fill the branch dropdown from the branch stock summary.
 
-        The agreed ReportService interface has no 'list branches' method, so
-        we call get_low_stock_report() once with no filter and collect the
-        distinct branches from the returned rows. This keeps us inside the
-        agreed interface instead of inventing a new service method.
+        We use get_branch_stock_summary() rather than the low-stock rows so
+        that branches with no low-stock items (or no stock at all) still
+        appear in the filter. Only branch_id and branch_name are read here.
         """
         try:
-            rows = self.services.report_service.get_low_stock_report(branch_id=None)
+            rows = self.services.report_service.get_branch_stock_summary()
         except Exception as exc:
             messagebox.showerror(
                 "Low stock", f"Could not load branches: {exc}", parent=self
