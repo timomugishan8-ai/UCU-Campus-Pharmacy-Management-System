@@ -55,6 +55,7 @@
   - `show()` is proposed as the navigation hook — the exact name must be agreed with Member 1.
   - `except Exception` is temporary until Member 5 defines a specific application-exception class.
 - **Next steps**: agree the GUI contract with Member 1, integrate all screens into `gui/main_window.py`, then run the full GUI walkthrough including low stock at quantity equal to the reorder level.
+- **Post-integration fix (2026-11-19)**: standardised the low-stock table column keys/headings to the convention used by the other four screens (`medicine`/`Medicine code`, `name`/`Name`, `quantity`/`Quantity`, `reorder`/`Reorder level`, `controlled`/`Controlled`). Underlying data and report dict keys are unchanged.
 
 ## Cindy – Database, Repositories, Stock Services and Reporting
 

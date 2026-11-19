@@ -26,13 +26,16 @@ class LowStockScreen(BaseScreen):
     """
 
     # (key, heading, width) - one place to describe the table columns.
+    # Keys and headings follow the GUI convention used by the other screens
+    # (Register Medicine, Receive Stock, Create Prescription, Dispense) so
+    # the same data is labelled consistently across the application.
     COLUMNS = (
-        ("medicine_code", "Code", 110),
-        ("medicine_name", "Medicine", 200),
-        ("branch_name", "Branch", 180),
-        ("quantity", "Qty", 70),
-        ("reorder_level", "Reorder level", 100),
-        ("is_controlled", "Controlled", 95),
+        ("medicine", "Medicine code", 120),
+        ("name", "Name", 200),
+        ("branch", "Branch", 180),
+        ("quantity", "Quantity", 90),
+        ("reorder", "Reorder level", 110),
+        ("controlled", "Controlled", 95),
     )
 
     ALL_BRANCHES = "All branches"
