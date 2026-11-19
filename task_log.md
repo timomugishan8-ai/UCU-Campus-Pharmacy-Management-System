@@ -1,5 +1,10 @@
 # Task Log
 
+## Mugisha Timothy 
+
+1. During Stage 2, I developed the project's Milestone 1 design package, covering the system requirements, functional and non-functional requirements, business rules, use cases and workflows. I documented the four-layer architecture, defined the responsibilities of the domain classes, services, repositories and GUI, and addressed key OOP concepts such as encapsulation, inheritance and polymorphism. I also prepared UML and database diagrams, including the class, use-case, architecture, ER and workflow diagrams. Finally, I established a requirements traceability matrix and identified key integration decisions requiring group review before implementation.
+
+
 ## 2026-11-18 - Member 3 (Conrad) - Prescription and dispensing
 
 - **Files changed**
