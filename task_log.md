@@ -15,3 +15,44 @@
   - `create_prescription()` returns a `Prescription` object; `get_prescription()` returns `Prescription | None`. Confirm this with Members 1, 4 and Cindy before integration.
   - `PrescriptionService` constructor takes `(prescription_repository, medicine_repository, stock_repository)`; prescriber/branch repositories are built automatically from the shared `Database`.
 - **Next steps**: Cindy to review `prescriber_repository.py`, Member 4/1 to place the two screens in the main window, full GUI walkthrough after other members' branches land.
+
+## Cindy – Database, Repositories, Stock Services and Reporting
+
+- **Files changed**
+  - `database/connection.py`: reusable SQLite connection manager with foreign-key enforcement.
+  - `database/schema.sql`: six agreed tables, constraints, indexes and deletion rules.
+  - `database/seed_data.py`: fictional seed data and idempotent seeding.
+  - `database/repositories/medicine_repository.py`: medicine persistence.
+  - `database/repositories/branch_repository.py`: branch persistence.
+  - `database/repositories/stock_repository.py`: branch-specific stock persistence, safe decrease and branch stock summary SQL.
+  - `database/repositories/prescription_repository.py`: prescription and line persistence.
+  - `database/repositories/prescriber_repository.py`: authorised prescriber allow-list lookup, reviewed for compatibility.
+  - `services/stock_service.py`: stock receipt and stock availability service.
+  - `services/report_service.py`: low-stock report and branch stock summary service.
+  - `tests/test_member5_database.py`: database and repository integration tests.
+  - `tests/test_cindy_stock_report.py`: StockRepository reporting and ReportService tests.
+  - `tests/test_cindy_stock_service.py`: StockService tests.
+  - `docs/database_design.md`: database contract and integration notes.
+  - `README.md`: project guide, setup, architecture, status and contribution information.
+  - `task_log.md`: Cindy contribution entry.
+- **Completed responsibilities**
+  - Database connection manager and SQLite schema.
+  - Database seed data and repositories.
+  - StockRepository branch stock summary SQL.
+  - ReportService implementation.
+  - StockService implementation.
+  - Reporting and StockService tests.
+  - Database design documentation.
+- **Pull requests merged into main**
+  - Documentation pull request: `cindy-documentation`.
+  - Implementation pull request: `cindy-database-services`.
+- **Verification results**
+  - 10 reporting tests passed.
+  - 14 StockService tests passed.
+  - 55 tests passed in the full suite after merging.
+  - `git diff --check` passed.
+- **Outstanding work**
+  - Participate in full application integration testing.
+  - Coordinate with Timothy on ApplicationServices.
+  - Coordinate with Matilda on GUI integration.
+  - Address any issues discovered during integration.
