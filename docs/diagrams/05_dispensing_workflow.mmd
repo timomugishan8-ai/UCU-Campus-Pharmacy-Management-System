@@ -1,0 +1,29 @@
+flowchart TD
+    A([Attendant selects prescription]) --> B[Begin one database transaction]
+    B --> C{Prescription exists?}
+    C -- No --> X[Raise not-found error]
+    C -- Yes --> D{Status is pending?}
+    D -- No --> Y[Reject dispensed/cancelled status]
+    D -- Yes --> E[Load all lines and medicine records]
+    E --> F{Any controlled medicine?}
+    F -- Yes --> G{Prescriber code on allow-list?}
+    G -- No --> Z[Reject unauthorised prescriber]
+    G -- Yes --> H[Check stock for every line at prescription branch]
+    F -- No --> H
+    H --> I{All lines sufficiently stocked?}
+    I -- No --> J[Raise insufficient-stock error]
+    I -- Yes --> K[Conditional stock deductions]
+    K --> L{Every update affected expected row?}
+    L -- No --> M[Raise concurrency/stock error]
+    L -- Yes --> N[Conditional pending-to-dispensed update]
+    N --> O{Exactly one prescription row updated?}
+    O -- No --> P[Raise invalid/concurrent state error]
+    O -- Yes --> Q[Commit transaction]
+    Q --> R([Return dispensed prescription])
+    X --> S[Rollback transaction]
+    Y --> S
+    Z --> S
+    J --> S
+    M --> S
+    P --> S
+    S --> T([Prescription remains pending; no stock deduction persists])

@@ -1,0 +1,23 @@
+flowchart LR
+    Attendant[Pharmacy attendant]
+    Admin[Pharmacy administrator / operator]
+    Prescriber[Authorised prescriber<br/>(simulated identity)]
+
+    subgraph System["Multi-Branch Campus Pharmacy System"]
+      UC1([Register medicine])
+      UC2([Receive stock])
+      UC3([Create prescription])
+      UC4([Dispense prescription])
+      UC5([View low-stock items])
+      UC6([Validate controlled-medicine prescriber])
+      UC7([Maintain/load branch and allow-list data])
+    end
+
+    Attendant --> UC1
+    Attendant --> UC2
+    Attendant --> UC3
+    Attendant --> UC4
+    Attendant --> UC5
+    UC4 -. "includes when controlled medicine present" .-> UC6
+    Prescriber -. "fictional prescriber code checked" .-> UC6
+    Admin --> UC7

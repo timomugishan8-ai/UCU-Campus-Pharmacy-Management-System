@@ -1,0 +1,30 @@
+flowchart TB
+    U[Pharmacy attendant] --> GUI[GUI / tkinter screens]
+    GUI --> APP[ApplicationServices facade]
+    APP --> SVC[Application services]
+    SVC --> DOM[Domain model]
+    SVC --> REPO[Repositories]
+    REPO --> DBM[Database manager]
+    DBM --> SQL[(SQLite database)]
+
+    subgraph L1["Layer 1 — GUI"]
+      GUI
+    end
+    subgraph L2["Layer 2 — Application"]
+      APP
+      SVC
+    end
+    subgraph L3["Layer 3 — Domain"]
+      DOM
+    end
+    subgraph L4["Layer 4 — Persistence"]
+      REPO
+      DBM
+      SQL
+    end
+
+    SQL -. "results / records" .-> DBM
+    DBM -. "mapped data / errors" .-> REPO
+    REPO -. "results / errors" .-> SVC
+    SVC -. "result / expected exception" .-> GUI
+    GUI -. "message / refreshed view" .-> U
