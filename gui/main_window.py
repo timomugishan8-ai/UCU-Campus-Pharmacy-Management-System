@@ -6,6 +6,9 @@ from app.services import ApplicationServices
 
 from gui.create_prescription import CreatePrescriptionScreen
 from gui.dispense import DispenseScreen
+from gui.register_medicine import RegisterMedicineScreen
+from gui.receive_stock import ReceiveStockScreen
+from gui.low_stock import LowStockScreen
 
 
 class MainWindow(tk.Tk):
@@ -80,8 +83,11 @@ class MainWindow(tk.Tk):
         """Create feature screens and register them for navigation."""
 
         screen_definitions = {
+            "Register Medicine": RegisterMedicineScreen,
+            "Receive Stock": ReceiveStockScreen,
             "Create Prescription": CreatePrescriptionScreen,
-            "Dispense": DispenseScreen
+            "Dispense": DispenseScreen,
+            "Low Stock": LowStockScreen,
         }
 
         for name, screen_class in screen_definitions.items():

@@ -13,14 +13,16 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from typing import Any, Optional
 
+from app.base_screen import BaseScreen
 
-class LowStockScreen(ttk.Frame):
+
+class LowStockScreen(BaseScreen):
     """Display medicines whose stock is at or below their reorder level.
 
     Constructor: ``LowStockScreen(parent, services)``.
-    ``parent`` is the widget that contains this screen (the main window's
-    content frame). ``services`` is the single shared ApplicationServices
-    object created by the application - we receive it, we never build it.
+    Inherits ``BaseScreen`` so it shares the agreed parent/services handling
+    with every other screen. ``services`` is the single shared
+    ApplicationServices object - we receive it, we never build it.
     """
 
     # (key, heading, width) - one place to describe the table columns.
@@ -36,9 +38,7 @@ class LowStockScreen(ttk.Frame):
     ALL_BRANCHES = "All branches"
 
     def __init__(self, parent: tk.Widget, services: Any) -> None:
-        super().__init__(parent)
-        self.parent = parent
-        self.services = services
+        super().__init__(parent, services)
         self._branch_ids: dict[str, int] = {}   # branch name -> branch id
         self.status_var = tk.StringVar(value="")
         self._build_widgets()
