@@ -9,14 +9,17 @@
   - `domain/stock.py`: `Stock` per `(medicine_code, branch_id)` with `receive()`, `can_fulfil()`, `decrease()`, `is_low_stock()` and `InsufficientStockError`; quantity never negative.
   - `services/medicine_service.py`: agreed contract methods `register_medicine(medicine)`, `get_all_medicines()`, `get_medicine_by_code(medicine_code)` returning `Medicine` objects (return format confirmed by Member 2 per interface contract section 10).
   - `tests/test_medicine.py`, `tests/test_stock.py`: 52 tests covering inheritance, overriding, polymorphism through the dispensing rule, validation rejections, read-only encapsulation, round trips, duplicate/invalid-price registration rejection and persistence across service restart.
-- **Feature**: medicine catalogue registration and lookup; branch and stock domain rules including per-branch quantities and the low-stock boundary (`quantity <= reorder_level`).
-- **Tests**: `py -m unittest discover -s tests` -> 107 tests passed (55 existing + 52 new).
+  - `gui/register_medicine.py`: registration screen following the agreed `Screen(parent, services)` pattern; catalogue listing; controlled-medicine checkbox; error dialogs for invalid price, duplicate code and blank fields.
+  - `gui/receive_stock.py`: stock receipt screen; medicine/branch dropdowns; branch options sourced from `report_service.get_branch_stock_summary()` per the 2026-11-19 agreement so empty branches still appear; branch stock listing.
+  - `tests/test_member2_gui.py`: 13 tkinter smoke tests driving both screens against a temporary database with `messagebox` mocked (no dialogs block the run).
+- **Feature**: medicine catalogue registration and lookup; branch and stock domain rules including per-branch quantities and the low-stock boundary (`quantity <= reorder_level`); medicine registration and stock receiving screens.
+- **Tests**: `py -m unittest discover -s tests` -> 120 tests passed (55 existing + 52 domain/service + 13 GUI).
 - **Decisions / confirmations**
   - MedicineService ownership confirmed as Member 2 per interface contract section 4 (supersedes the earlier task-allocation question).
   - MedicineService returns domain objects, not dictionaries; `Medicine.to_dict()` is available for screens that prefer row shape.
   - ReportService agreed formats verified as already implemented in `StockRepository.get_branch_stock_summary()`; Matilda's low-stock screen already sources its branch filter from the summary.
   - No changes to shared interfaces, repositories or schema.
-- **Next steps**: coordinate with Matilda on `register_medicine` / `receive_stock` screens (second batch, after her `base_screen.py` lands); confirm constructor with Timothy for the `ApplicationServices` facade.
+- **Next steps**: confirm constructor with Timothy for the `ApplicationServices` facade (`MedicineService(medicine_repository)`; `StockService` built with the shared repositories); restyle both screens onto Matilda's `base_screen.py` once it lands; joint GUI walkthrough with Member 4.
 
 ## 2026-11-18 - Member 3 (Conrad) - Prescription and dispensing
 
