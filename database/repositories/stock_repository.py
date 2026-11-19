@@ -197,3 +197,31 @@ class StockRepository:
         with self.db.connection() as own_conn:
             rows = own_conn.execute(sql, params).fetchall()
             return [dict(row) for row in rows]
+    def get_branch_stock_summary(
+        self, conn: Optional[sqlite3.Connection] = None
+    ) -> list[dict]:
+        """Return one summary row per branch.
+
+        Branches without stock are retained with zero values. Low stock is
+        counted where ``quantity <= reorder_level``.
+        """
+        sql = (
+            "SELECT b.branch_id, b.branch_name, "
+            "COUNT(DISTINCT s.medicine_code) AS medicine_count, "
+            "COALESCE(SUM(s.quantity), 0) AS total_quantity, "
+            "COUNT(CASE WHEN s.quantity <= m.reorder_level THEN 1 END) "
+            "AS low_stock_count "
+            "FROM branches AS b "
+            "LEFT JOIN stock AS s ON s.branch_id = b.branch_id "
+            "LEFT JOIN medicines AS m ON m.medicine_code = s.medicine_code "
+            "GROUP BY b.branch_id, b.branch_name "
+            "ORDER BY b.branch_id"
+        )
+
+        if conn is not None:
+            rows = conn.execute(sql).fetchall()
+            return [dict(row) for row in rows]
+
+        with self.db.connection() as own_conn:
+            rows = own_conn.execute(sql).fetchall()
+            return [dict(row) for row in rows]
