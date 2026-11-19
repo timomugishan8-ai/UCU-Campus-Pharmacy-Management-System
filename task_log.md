@@ -58,7 +58,7 @@
 - **Post-integration fix (2026-11-19)**: standardised the low-stock table column keys/headings to the convention used by the other four screens (`medicine`/`Medicine code`, `name`/`Name`, `quantity`/`Quantity`, `reorder`/`Reorder level`, `controlled`/`Controlled`). Underlying data and report dict keys are unchanged.
 - **Dashboard work (2026-11-19)**:
   - Created `gui/dashboard.py`: `DashboardScreen(parent, services)` with four service-backed stat cards (Total Medicines, Low Stock Items, Total Stock Units, Branches), an Inventory Status table (status computed from `quantity <= reorder_level`, colour-coded) and a Branch Overview table. No SQL and no invented/trend data.
-  - Restyled `gui/main_window.py`: dark navy sidebar, teal pill logo and UCU Pharmacy identity from the reference images; menu labels aligned to the reference (Dashboard, Medicine Inventory, Receive Stock, Prescriptions, Dispense Medicine, Low Stock). Dashboard is the default landing screen. One shared `ttk.Style` gives all screens consistent table headings.
+  - Restyled `gui/main_window.py`: dark navy sidebar, teal pill logo and UCU Pharmacy identity from the reference images; menu labels (Dashboard, Register Medicine, Receive Stock, Prescriptions, Dispense Medicine, Low Stock). Dashboard is the default landing screen. One shared `ttk.Style` gives all screens consistent table headings.
   - "Reports" from the reference was not added because no Reports screen exists; the dashboard covers the reporting summary.
   - Verification: all 120 tests pass; smoke test confirmed 6 registered screens, cards 5/3/167/2, 8 inventory rows, 2 branch rows and navigation switching.
 

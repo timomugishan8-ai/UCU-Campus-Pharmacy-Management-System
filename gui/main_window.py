@@ -137,7 +137,7 @@ class MainWindow(tk.Tk):
         """Create each screen once with the shared services object."""
         screen_definitions = {
             "Dashboard": DashboardScreen,
-            "Medicine Inventory": RegisterMedicineScreen,
+            "Register Medicine": RegisterMedicineScreen,
             "Receive Stock": ReceiveStockScreen,
             "Prescriptions": CreatePrescriptionScreen,
             "Dispense Medicine": DispenseScreen,
