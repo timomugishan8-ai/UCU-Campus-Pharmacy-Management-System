@@ -1,5 +1,23 @@
 # Task Log
 
+## 2026-11-19 - Member 2 (Mulisa) - Medicine, branch and stock domain
+
+- **Branch**: `member-2-domain` (PR opened against `main`)
+- **Files changed**
+  - `domain/medicine.py`: abstract `Medicine` base with validated, read-only attributes; `OrdinaryMedicine` and `ControlledMedicine` overriding `requires_prescriber_code()`; `Medicine.create()` / `Medicine.from_dict()` subtype mapping; `MedicineError`, `InvalidMedicineError`, `DuplicateMedicineError` (all derive from `ValueError` for the GUI boundary).
+  - `domain/branch.py`: `Branch` with `branch_id`/`branch_name`, validation, `from_dict`/`to_dict`.
+  - `domain/stock.py`: `Stock` per `(medicine_code, branch_id)` with `receive()`, `can_fulfil()`, `decrease()`, `is_low_stock()` and `InsufficientStockError`; quantity never negative.
+  - `services/medicine_service.py`: agreed contract methods `register_medicine(medicine)`, `get_all_medicines()`, `get_medicine_by_code(medicine_code)` returning `Medicine` objects (return format confirmed by Member 2 per interface contract section 10).
+  - `tests/test_medicine.py`, `tests/test_stock.py`: 52 tests covering inheritance, overriding, polymorphism through the dispensing rule, validation rejections, read-only encapsulation, round trips, duplicate/invalid-price registration rejection and persistence across service restart.
+- **Feature**: medicine catalogue registration and lookup; branch and stock domain rules including per-branch quantities and the low-stock boundary (`quantity <= reorder_level`).
+- **Tests**: `py -m unittest discover -s tests` -> 107 tests passed (55 existing + 52 new).
+- **Decisions / confirmations**
+  - MedicineService ownership confirmed as Member 2 per interface contract section 4 (supersedes the earlier task-allocation question).
+  - MedicineService returns domain objects, not dictionaries; `Medicine.to_dict()` is available for screens that prefer row shape.
+  - ReportService agreed formats verified as already implemented in `StockRepository.get_branch_stock_summary()`; Matilda's low-stock screen already sources its branch filter from the summary.
+  - No changes to shared interfaces, repositories or schema.
+- **Next steps**: coordinate with Matilda on `register_medicine` / `receive_stock` screens (second batch, after her `base_screen.py` lands); confirm constructor with Timothy for the `ApplicationServices` facade.
+
 ## 2026-11-18 - Member 3 (Conrad) - Prescription and dispensing
 
 - **Files changed**
