@@ -8,13 +8,13 @@
 - **GUI:** Tkinter (desktop)
 - **Database:** SQLite
 
-> Status: This project is under active development. The application, database schema, services, repositories and tests are **not yet implemented**. Setup, database, application and testing instructions below are placeholders and will be updated as the project progresses.
+> Status: This project is under active development. The database foundation, repositories, prescription domain/service and some GUI screens are implemented. The application entry point, several domain classes, services and GUI screens are still incomplete.
 
 ---
 
 ## 1. Project overview
 
-This system is a desktop application for managing pharmacy operations across multiple campus branches. It will track medicines, branch-specific stock levels, prescriptions, dispensing transactions and low-stock reports. The goal is to support accurate inventory control and safe dispensing of medicines (including controlled medicines that require an authorised simulated prescriber code) while keeping each branch's stock consistent.
+This system is a desktop application for managing pharmacy operations across multiple campus branches. It tracks medicines, branch-specific stock levels, prescriptions, dispensing transactions and low-stock reports. The goal is to support accurate inventory control and safe dispensing of medicines, including controlled medicines that require an authorised simulated prescriber code, while keeping each branch's stock consistent.
 
 The project follows a layered architecture:
 
@@ -23,18 +23,30 @@ The project follows a layered architecture:
 - **Repositories** handle all SQL and persistence against SQLite.
 - **GUI (Tkinter)** communicates only with application services, never directly with SQL.
 
-## 2. Main features (planned)
+## 2. Project objectives and main features
 
-- Register and manage medicines (code, name, unit price, reorder level, controlled flag).
-- Manage pharmacy branches.
-- Track branch-specific stock levels and receive new stock.
-- Create prescriptions with multiple medicine lines.
-- Dispense prescriptions atomically: if any medicine cannot be supplied, no stock is deducted and the prescription remains pending.
+### Objectives
+
+- Manage medicines, branches and branch-specific stock.
+- Create and dispense prescriptions safely.
+- Prevent partial stock deduction when a prescription cannot be fully supplied.
 - Enforce authorised simulated prescriber codes for controlled medicines.
-- Generate low-stock reports per branch.
-- Reporting on inventory and dispensing activity.
+- Identify low-stock items per branch.
+- Persist data in SQLite between application sessions.
 
-Optional medicine attributes (such as strength or form) may be added later if the group agrees; they are not mandatory requirements.
+### Main features
+
+Implemented or partially implemented:
+- Database schema, connection management and seed data.
+- Repositories for medicines, branches, stock, prescriptions and authorised prescribers.
+- Prescription creation and atomic dispensing.
+- Low-stock report screen (on `origin/member-4-gui`).
+
+Planned or incomplete:
+- Medicine, branch and stock domain classes.
+- MedicineService, StockService and ReportService.
+- ApplicationServices facade and application entry point.
+- Main window and several feature screens.
 
 ## 3. Technologies used
 
@@ -44,108 +56,118 @@ Optional medicine attributes (such as strength or form) may be added later if th
 - unittest (Python standard library, testing)
 - Git and GitHub (version control and collaboration)
 
-No third-party dependencies are required at this stage; requirements.txt will be updated if any are added.
+No third-party dependencies are required at this stage; `requirements.txt` is currently empty.
 
-## 4. Project folder structure
+## 4. Group members and responsibilities
+
+1. **Timothy** - Architecture and integration.
+2. **Mulisa** - Medicine, branch and stock domain classes, MedicineService, medicine registration and stock receiving.
+3. **Conrad** - Prescription and dispensing, including PrescriptionService.
+4. **Matilda** - Tkinter GUI coordination.
+5. **Cindy** - Database, repositories, StockService, ReportService, database integration, testing and documentation.
+
+## 5. Project folder structure
 
 ```text
 UCU-Campus-Pharmacy-Management-System/
 |-- app/            # Application entry points and shared screen services
-|-- data/           # SQLite database file(s) (generated at runtime, not committed)
-|-- database/       # Connection, schema, seed data and repositories
+|   |-- base_screen.py   # currently empty placeholder
+|   +-- services.py      # ApplicationServices facade, currently empty placeholder
+|-- data/            # SQLite database file(s), generated at runtime, not committed
+|-- database/        # Connection, schema, seed data and repositories
+|   |-- connection.py
+|   |-- schema.sql
+|   |-- seed_data.py
 |   +-- repositories/
-|-- domain/         # Core pharmacy domain models
-|-- gui/            # Tkinter screens
-|-- services/       # Business services
-|-- tests/          # Unit and integration tests
-|-- docs/           # Design, requirements and test reports
-|-- main.py         # Application entry point
+|       |-- branch_repository.py
+|       |-- medicine_repository.py
+|       |-- prescriber_repository.py
+|       |-- prescription_repository.py
+|       +-- stock_repository.py
+|-- domain/          # Core pharmacy domain models
+|   |-- branch.py         # currently empty placeholder
+|   |-- medicine.py       # currently empty placeholder
+|   |-- prescription.py   # implemented
+|   +-- stock.py          # currently empty placeholder
+|-- gui/             # Tkinter screens
+|   |-- create_prescription.py   # implemented
+|   |-- dispense.py              # implemented
+|   |-- low_stock.py             # implemented on origin/member-4-gui
+|   |-- main_window.py           # currently empty placeholder
+|   |-- receive_stock.py         # currently empty placeholder
+|   +-- register_medicine.py     # currently empty placeholder
+|-- services/        # Business services
+|   |-- medicine_service.py      # currently empty placeholder
+|   |-- prescription_service.py  # implemented
+|   |-- report_service.py        # currently empty placeholder
+|   +-- stock_service.py         # currently empty placeholder
+|-- tests/           # Unit and integration tests
+|   |-- test_dispensing.py
+|   |-- test_medicine.py
+|   |-- test_member5_database.py
+|   |-- test_prescription.py
+|   +-- test_stock.py
+|-- docs/            # Design, requirements and database design
+|   |-- database_design.md       # implemented
+|   |-- design.md                # empty on main; full version on origin/member-1-architecture
+|   |-- requirements.md          # empty on main; full version on origin/member-1-architecture
+|   +-- test_report.md           # empty
+|-- main.py          # Application entry point, currently empty placeholder
+|-- README.md
 |-- requirements.txt
-+-- README.md
++-- task_log.md
 ```
 
-## 5. Team contribution
+## 6. System architecture
 
-This is a five-member group project (CSC2105). Placeholders - to be filled in with real names and responsibilities:
+The system uses four layers:
 
-- **Member 1:** (to be assigned)
-- **Member 2:** (to be assigned)
-- **Member 3:** Conrad - Prescription and dispensing owner (prescription domain, prescription service, create/dispense screens and their tests).
-- **Member 4:** (to be assigned)
-- **Member 5:** Database development, repositories, selected services, testing coordination and documentation.
+1. **GUI (`gui/`)** - Tkinter screens, input collection, navigation, messages and display refresh. No SQL.
+2. **Application services (`app/services.py`)** - intended composition point for repositories and services. Not yet implemented.
+3. **Services and domain (`services/`, `domain/`)** - services coordinate use cases; domain objects enforce object-level rules. No tkinter imports.
+4. **Repositories and database (`database/`)** - parameterised SQLite access, row mapping, connection management and transaction boundaries.
 
-### 5.1 Member 3 contribution - Prescription and dispensing (Conrad)
+Communication flow:
 
-This section was added by Member 3. It describes only the prescription and dispensing part; Member 5 owns the rest of this README.
-
-**Files owned by Member 3**
-
-- `domain/prescription.py` - `Prescription`, `PrescriptionLine`, status constants, valid transitions and prescription exceptions.
-- `services/prescription_service.py` - the agreed public service methods and the dispensing transaction.
-- `gui/create_prescription.py` - `CreatePrescriptionScreen(parent, services)`.
-- `gui/dispense.py` - `DispenseScreen(parent, services)`.
-- `tests/test_prescription.py` and `tests/test_dispensing.py` - 23 tests for this feature.
-- `database/repositories/prescriber_repository.py` - new allow-list lookup (needs Member 5 review because Member 5 owns the database folder).
-
-**What is implemented**
-
-- Multi-line prescriptions tied to one branch and a fictional patient identifier.
-- `pending`, `dispensed` and `cancelled` statuses; only pending prescriptions can dispense or cancel.
-- Controlled medicines require an authorised simulated prescriber code; ordinary medicines do not.
-- All-or-nothing dispensing: one SQLite transaction (`BEGIN IMMEDIATE`) covers status checks, controlled-medicine authorisation, stock checks, conditional stock reductions and the conditional status update. If any step fails, everything rolls back and no stock is deducted.
-
-**Agreed public methods**
-
-```python
-PrescriptionService(prescription_repository, medicine_repository, stock_repository)
-
-create_prescription(patient_identifier, branch_id, prescriber_code, lines) -> Prescription
-dispense_prescription(prescription_id) -> Prescription
-cancel_prescription(prescription_id) -> Prescription
-get_prescription(prescription_id) -> Prescription | None
+```text
+User -> Tkinter screen -> ApplicationServices -> service -> domain/repository -> SQLite
 ```
 
-The prescriber and branch repositories are built automatically from the shared `Database`, so `app/services.py` only needs the three repository arguments above. The return format (`Prescription` object) should be confirmed with Members 1, 4 and 5 during integration.
+Repository methods that accept `conn` must use the supplied connection and must not start a separate transaction. This allows a service to keep related reads and writes in one transaction.
 
-**Tests**
+## 7. Database tables and their purpose
 
-```powershell
-py -m unittest tests.test_prescription tests.test_dispensing -v
-```
+The SQLite schema is defined in `database/schema.sql`.
 
-All 23 Member 3 tests pass; the whole suite (`py -m unittest discover -s tests -v`) passes 31 tests. Tests use temporary databases, never the live `data/pharmacy.db`.
+- `medicines` - medicine catalogue: code, name, unit price, reorder level, controlled flag.
+- `branches` - pharmacy branches with unique IDs and names.
+- `stock` - branch-specific medicine quantities using a composite primary key `(medicine_code, branch_id)`.
+- `prescriptions` - prescription header: branch, fictional patient identifier, status, prescriber code, timestamps.
+- `prescription_lines` - medicine lines for a prescription.
+- `authorised_prescribers` - simulated allow-list for controlled-medicine prescriber codes.
 
-**Integration notes**
+Important rules:
+- Stock quantity must never be negative.
+- Prescription status is restricted to `pending`, `dispensed` and `cancelled`.
+- Prescription line quantities must be positive.
+- Duplicate medicine lines in one prescription are prevented.
+- Low stock means quantity is less than or equal to the medicine's reorder level, per branch.
 
-- The group agreement did not name a repository for `authorised_prescribers`. `PrescriberRepository.is_authorised(code, conn=None)` was added so the allow-list check stays in the repository layer and joins the dispensing transaction.
-- The two screens use the shared services object and contain no SQL.
-- Branch: `member-3-prescriptions`.
+## 8. Installation and environment setup
 
-## 6. Prerequisites
-
-- Python 3.13 installed (with Tkinter and SQLite support).
+Prerequisites:
+- Python 3.13 installed with Tkinter and SQLite support.
 - Git installed.
 - Visual Studio Code (recommended) with the Python extension.
-- (To be completed during development) Any additional dependencies listed in requirements.txt.
 
-## 7. VS Code setup instructions
-
-1. Open VS Code.
-2. Select File -> Open Folder and choose the project folder.
-3. Install the recommended Python extension (by Microsoft) if prompted.
-4. Select the project's Python interpreter: open the Command Palette (Ctrl+Shift+P) -> Python: Select Interpreter -> choose the .venv interpreter.
-5. (To be completed during development) Configure launch settings and tasks if needed.
-
-## 8. Virtual environment (Windows PowerShell)
-
-Create and activate a virtual environment:
+Create and activate a virtual environment on Windows PowerShell:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-If script execution is restricted, run once (as Administrator) or use:
+If script execution is restricted:
 
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
@@ -163,9 +185,9 @@ Deactivate when finished:
 deactivate
 ```
 
-## 9. Database setup instructions
+## 9. Database initialization and sample data
 
-The SQLite schema is implemented in `database/schema.sql` and is created automatically when the application or tests initialise a database.
+The schema is implemented in `database/schema.sql` and is created automatically when a database is initialised.
 
 Seed fictional development data with:
 
@@ -173,40 +195,70 @@ Seed fictional development data with:
 python -m database.seed_data
 ```
 
+This creates fictional branches, medicines, stock rows and one authorised prescriber. It does not use real patient information.
+
 Do not commit generated `.db`, `.sqlite` or `.sqlite3` files.
 
 ## 10. How to run the application
 
-(To be completed during development)
+The application is not yet fully runnable. `main.py`, `app/services.py`, `gui/main_window.py` and several feature screens are still placeholders.
+
+Prescription screens exist in `gui/create_prescription.py` and `gui/dispense.py`, but they require the shared application services and main window integration that are not yet implemented.
+
+Do not run `python main.py` expecting a complete application.
+
+## 11. How to run the available tests
+
+Run all tests:
 
 ```powershell
-python main.py
+python -m unittest discover -s tests -v
 ```
 
-The entry point and GUI are not implemented yet.
+Implemented tests:
+- Cindy's database/repository tests: `tests/test_member5_database.py`
+- Conrad's prescription and dispensing tests: `tests/test_prescription.py` and `tests/test_dispensing.py`
 
-## 11. How to run tests
+Other test files are currently empty placeholders.
 
-```powershell
-python -m unittest discover -s tests
-```
+Tests use temporary databases and do not modify the live demonstration database.
 
-Member 5's database tests and Member 3's prescription/dispensing tests are implemented (31 tests pass). Other members' suites are still being added.
+## 12. Current implementation status
 
-## 12. Git collaboration workflow
+Completed:
+- Database schema, connection management and seed data.
+- Repositories for medicines, branches, stock, prescriptions and authorised prescribers.
+- Prescription domain and PrescriptionService.
+- Create-prescription and dispense GUI screens.
+- Low-stock GUI screen on `origin/member-4-gui`.
+- Database design documentation.
 
-- Work on a dedicated feature branch per member (e.g. member-5-database-tests).
-- Pull the latest main before starting work: git pull origin main.
+Incomplete:
+- Medicine, branch and stock domain classes.
+- MedicineService, StockService and ReportService.
+- ApplicationServices facade.
+- Main window and remaining GUI screens.
+- Medicine registration and stock receiving screens.
+- Application entry point.
+
+## 13. GitHub repository and contribution workflow
+
+- Work on a dedicated feature branch per member.
+- Pull the latest `main` before starting work.
 - Make small, focused commits with clear messages.
-- Do not commit generated files (.venv/, __pycache__/, *.db, .env).
-- Open a pull request to main and request review before merging.
+- Do not commit generated files (`.venv/`, `__pycache__/`, `*.db`, `.env`).
+- Open a pull request to `main` and request review before merging.
 - Resolve conflicts locally and re-run tests before pushing.
-- Never force-push to main.
+- Never force-push to `main`.
 
-## 13. Academic integrity and AI assistance note
+Historical branch names such as `member-5-database-tests` remain part of the project history.
+
+## 14. Academic integrity and fictional data note
 
 This project is submitted for academic assessment (CSC2105). All members are responsible for understanding and being able to explain every part of the submitted code. AI tools may be used to assist with drafting, refactoring and documentation, but the final submission must reflect the group's own understanding. Any AI-assisted content must be reviewed, tested and owned by the group. Plagiarism or uncredited copying is not permitted.
 
+The system uses fictional patient identifiers and simulated prescriber codes only. No real patient or prescriber information is stored.
+
 ---
 
-Last updated: during initial repository setup (database, application and tests not yet implemented).
+Last updated: 19 November 2026.
