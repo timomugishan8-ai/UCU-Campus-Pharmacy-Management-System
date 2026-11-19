@@ -41,6 +41,21 @@
   - `PrescriptionService` constructor takes `(prescription_repository, medicine_repository, stock_repository)`; prescriber/branch repositories are built automatically from the shared `Database`.
 - **Next steps**: Cindy to review `prescriber_repository.py`, Member 4/1 to place the two screens in the main window, full GUI walkthrough after other members' branches land.
 
+## 2026-11-19 - Member 4 (Matilda) - Low-stock GUI screen
+
+- **Files changed**
+  - `gui/low_stock.py` (new, 171 lines): `LowStockScreen` built on `ttk.Frame`, following the agreed `Screen(parent, services)` constructor pattern.
+- **Feature**: read-only low-stock report with a branch filter dropdown, Refresh button, results table and status line. Calls only `services.report_service.get_low_stock_report(branch_id=...)`; contains no SQL and creates no database connection.
+- **Tests**: `python -m py_compile gui/low_stock.py` passed. Runtime/GUI tests are still not possible because `app/services.py`, `gui/main_window.py` and Members 1/2's screens are not yet implemented. Cindy's `ReportService` is now available with the agreed method signatures and field names.
+- **Issues / decisions to confirm**
+  - Confirmed with Member 5 (2026-11-19): `get_low_stock_report(branch_id=None)` returns exactly the fields this screen reads (`medicine_code`, `medicine_name`, `branch_id`, `branch_name`, `quantity`, `reorder_level`, `is_controlled`) with `quantity <= reorder_level`. No change needed for the report data.
+  - Agreed with Member 5 (revised 2026-11-19): `get_branch_stock_summary()` returns one dict per branch with `branch_id`, `branch_name`, `medicine_count`, `total_quantity`, `low_stock_count`; branches with no stock appear with zeros. The aggregate SQL lives in `StockRepository`; `ReportService` only calls the repository method.
+  - The branch dropdown now reads `branch_id`/`branch_name` from `get_branch_stock_summary()` instead of low-stock rows, so branches with no low-stock items are still offered in the filter.
+  - The screen currently inherits `ttk.Frame` because `app/base_screen.py` is empty; it will switch to `BaseScreen` once Member 1 implements it.
+  - `show()` is proposed as the navigation hook — the exact name must be agreed with Member 1.
+  - `except Exception` is temporary until Member 5 defines a specific application-exception class.
+- **Next steps**: agree the GUI contract with Member 1, integrate all screens into `gui/main_window.py`, then run the full GUI walkthrough including low stock at quantity equal to the reorder level.
+
 ## Cindy – Database, Repositories, Stock Services and Reporting
 
 - **Files changed**
@@ -81,3 +96,4 @@
   - Coordinate with Timothy on ApplicationServices.
   - Coordinate with Matilda on GUI integration.
   - Address any issues discovered during integration.
+
