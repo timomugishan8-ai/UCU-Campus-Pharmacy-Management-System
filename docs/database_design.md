@@ -3,7 +3,7 @@
 UCU Campus Pharmacy Management System
 Multi-Branch Campus Pharmacy Inventory, Dispensing and Reporting System
 Course: CSC2105 - Object-Oriented Programming Using Python
-Owner: Member 5 (database development, repositories, selected services, testing coordination, documentation)
+Owner: Cindy (database development, repositories, selected services, testing coordination, documentation)
 
 This document is the single database contract for the group. All members must follow the table names, column names, data types and constraints defined here. No database code or schema file has been implemented yet; this is a design document only.
 
@@ -348,7 +348,7 @@ A dispensed prescription cannot be dispensed again because status is no longer '
 - Services coordinate business rules and call repositories; they must not execute SQL directly.
 - Repositories handle parameterised SQL and persistence.
 
-### Repositories (Member 5)
+### Repositories (Cindy)
 - Each repository method accepts an optional shared connection/transaction handle.
 - Repositories must not commit or rollback; the calling service owns the transaction.
 - All SQL must be parameterised.
