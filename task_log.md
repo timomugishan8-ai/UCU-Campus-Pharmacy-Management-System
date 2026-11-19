@@ -15,3 +15,16 @@
   - `create_prescription()` returns a `Prescription` object; `get_prescription()` returns `Prescription | None`. Confirm this with Members 1, 4 and 5 before integration.
   - `PrescriptionService` constructor takes `(prescription_repository, medicine_repository, stock_repository)`; prescriber/branch repositories are built automatically from the shared `Database`.
 - **Next steps**: Member 5 to review `prescriber_repository.py`, Member 4/1 to place the two screens in the main window, full GUI walkthrough after other members' branches land.
+
+## 2026-11-19 - Member 4 (Matilda) - Low-stock GUI screen
+
+- **Files changed**
+  - `gui/low_stock.py` (new, 171 lines): `LowStockScreen` built on `ttk.Frame`, following the agreed `Screen(parent, services)` constructor pattern.
+- **Feature**: read-only low-stock report with a branch filter dropdown, Refresh button, results table and status line. Calls only `services.report_service.get_low_stock_report(branch_id=...)`; contains no SQL and creates no database connection.
+- **Tests**: `python -m py_compile gui/low_stock.py` passed. Runtime/GUI tests are not yet possible because `app/services.py`, `gui/main_window.py` and `services/report_service.py` are still empty placeholders on the other members' branches.
+- **Issues / decisions to confirm**
+  - The agreed `ReportService` has no "list branches" method, so the branch dropdown is derived from `branch_id`/`branch_name` in the report rows. Asked Member 5 to confirm this or add `get_all_branches()`.
+  - The screen currently inherits `ttk.Frame` because `app/base_screen.py` is empty; it will switch to `BaseScreen` once Member 1 implements it.
+  - `show()` is proposed as the navigation hook — the exact name must be agreed with Member 1.
+  - `except Exception` is temporary until Member 5 defines a specific application-exception class.
+- **Next steps**: agree the GUI contract with Member 1, integrate all screens into `gui/main_window.py`, then run the full GUI walkthrough including low stock at quantity equal to the reorder level.
