@@ -2,6 +2,7 @@ from app.services import ApplicationServices
 from gui.main_window import MainWindow
 from database.seed_data import seed
 
+import tkinter as tk
 
 def main():
     """Initialize and launch the pharmacy management system."""

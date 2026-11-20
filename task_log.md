@@ -2,7 +2,20 @@
 
 ## Mugisha Timothy 
 
-1. During Stage 2, I developed the project's Milestone 1 design package, covering the system requirements, functional and non-functional requirements, business rules, use cases and workflows. I documented the four-layer architecture, defined the responsibilities of the domain classes, services, repositories and GUI, and addressed key OOP concepts such as encapsulation, inheritance and polymorphism. I also prepared UML and database diagrams, including the class, use-case, architecture, ER and workflow diagrams. Finally, I established a requirements traceability matrix and identified key integration decisions requiring group review before implementation.
+- Reviewed the project requirements and identified the need for a centralized architecture to integrate all five members' contributions.
+- Established the system's four-layer architecture: Presentation (GUI), Application, Service/Domain, and Database/Repository layers.
+- Defined the communication flow between GUI screens, application services, domain logic, repositories, and the SQLite database.
+- Developed the ApplicationServices class in app/services.py to centralize dependency creation and service composition.
+- Configured a single shared database instance to be injected into all five repositories.
+- Integrated the medicine, stock, prescription, and report services into the application services facade.
+- Implemented BaseScreen in app/base_screen.py to provide a common foundation for GUI screens and shared service access.
+- Designed and implemented MainWindow in gui/main_window.py to provide the main application window, navigation panel, screen registration, and screen switching.
+- Developed the application entry point in main.py to coordinate service initialization, database schema creation, sample data seeding, GUI startup, and the Tkinter event loop.
+- Reviewed existing database connection and seed-data implementations to understand and align the application startup process.
+- Prepared the interface_contract.md documentation to define component interfaces, constructors, service methods, dependencies, database conventions, and integration requirements.
+- Prepared architecture and workflow diagrams to visually document the system structure and component interactions.
+- Established integration guidelines to minimize coupling, avoid duplicated dependencies, and ensure consistency across members' implementations.
+- Prepared the integration and verification approach for reviewing, connecting, and testing individual components before final system delivery.
 
 ## 2026-11-19 - Member 2 (Mulisa) - Medicine, branch and stock domain
 
