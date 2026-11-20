@@ -17,14 +17,14 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from typing import Any
 
+from app.base_screen import BaseScreen
 
-class ReceiveStockScreen(ttk.Frame):
+
+class ReceiveStockScreen(BaseScreen):
     """Form for receiving a positive quantity of a medicine at a branch."""
 
     def __init__(self, parent: Any, services: Any) -> None:
-        super().__init__(parent)
-        self.parent = parent
-        self.services = services
+        super().__init__(parent, services)
         self._branch_ids: dict[str, int] = {}   # branch name -> branch id
         self._medicine_codes: list[str] = []
         self._build_widgets()
@@ -145,6 +145,15 @@ class ReceiveStockScreen(ttk.Frame):
     # ------------------------------------------------------------------ #
     # Display helpers
     # ------------------------------------------------------------------ #
+    def refresh(self) -> None:
+        """Navigation hook called by ``MainWindow.show_screen``.
+
+        Reloads the dropdowns first so a medicine or branch added
+        elsewhere appears, then reloads the selected branch's stock.
+        """
+        self.refresh_options()
+        self.refresh_stock()
+
     def refresh_options(self) -> None:
         """Reload the medicine and branch dropdowns from the services."""
         medicines = self.services.medicine_service.get_all_medicines()
