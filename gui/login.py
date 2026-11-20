@@ -187,6 +187,10 @@ def ask_for_login(services: Any) -> Optional[StaffUser]:
     root.title("Sign in - UCU Pharmacy Management System")
     root.geometry("460x360")
     root.minsize(460, 360)
-    LoginScreen(root, services)
+    screen = LoginScreen(root, services)
+    # A frame must be given geometry explicitly: MainWindow uses place()
+    # to mount its screens, but this gate is standalone, so pack the
+    # screen so the form actually fills the window.
+    screen.pack(fill="both", expand=True)
     root.mainloop()
     return services.current_user

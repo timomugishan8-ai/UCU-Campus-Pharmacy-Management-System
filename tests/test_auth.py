@@ -27,7 +27,7 @@ from domain.user import (
     StaffUser,
     UserError,
 )
-from gui.login import LoginScreen
+from gui.login import LoginScreen, ask_for_login
 from gui.user_admin import UserAdminScreen
 from services.auth_service import (
     AuthService,
@@ -482,6 +482,44 @@ class LoginScreenTests(ScreenTestCase):
         error.assert_called_once()
         info.assert_not_called()
         self.assertIsNone(self.services.current_user)
+
+
+class AskForLoginRunnerTests(unittest.TestCase):
+    """``ask_for_login`` must mount the screen, or the window is blank."""
+
+    def test_screen_is_packed_into_the_gate_window(self):
+        fd, db_path = tempfile.mkstemp(suffix=".db")
+        os.close(fd)
+        if os.path.exists(db_path):
+            os.remove(db_path)
+        try:
+            db = Database(db_path)
+            db.initialize_schema()
+            services = _StubAuthServices(db)
+
+            observed = {}
+
+            def fake_mainloop(root):
+                # Runs instead of the real event loop: inspect how the
+                # window mounted its screen, then clean the window up.
+                children = root.winfo_children()
+                observed["child_count"] = len(children)
+                observed["pack"] = children[0].pack_info() if children else {}
+                root.destroy()
+
+            with patch.object(tk.Tk, "mainloop", fake_mainloop):
+                result = ask_for_login(services)
+
+            # Nobody signed in during the fake loop, so no session.
+            self.assertIsNone(result)
+            # Regression: the screen used to be created but never packed,
+            # which rendered a completely blank login window.
+            self.assertEqual(observed["child_count"], 1)
+            self.assertEqual(observed["pack"].get("fill"), "both")
+            self.assertIn(observed["pack"].get("expand"), (1, "1"))
+        finally:
+            if os.path.exists(db_path):
+                os.remove(db_path)
 
 
 class UserAdminScreenTests(ScreenTestCase):
