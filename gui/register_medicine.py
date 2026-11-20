@@ -13,16 +13,15 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from typing import Any
 
+from app.base_screen import BaseScreen
 from domain.medicine import Medicine
 
 
-class RegisterMedicineScreen(ttk.Frame):
+class RegisterMedicineScreen(BaseScreen):
     """Form for adding a medicine plus a read-only catalogue listing."""
 
     def __init__(self, parent: Any, services: Any) -> None:
-        super().__init__(parent)
-        self.parent = parent
-        self.services = services
+        super().__init__(parent, services)
         self._build_widgets()
         self.refresh_medicines()
 
@@ -169,6 +168,10 @@ class RegisterMedicineScreen(ttk.Frame):
     # ------------------------------------------------------------------ #
     # Display helpers
     # ------------------------------------------------------------------ #
+    def refresh(self) -> None:
+        """Navigation hook called by ``MainWindow.show_screen``."""
+        self.refresh_medicines()
+
     def refresh_medicines(self) -> None:
         """Reload the catalogue listing from the service."""
         for item in self.medicine_tree.get_children():

@@ -6,7 +6,7 @@
 
 ## 2026-11-19 - Member 2 (Mulisa) - Medicine, branch and stock domain
 
-- **Branch**: `member-2-domain` (PR opened against `main`)
+- **Branch**: `member-2-domain` (PR #7, merged into `main`); follow-up branch `member-2-navigation-refresh`
 - **Files changed**
   - `domain/medicine.py`: abstract `Medicine` base with validated, read-only attributes; `OrdinaryMedicine` and `ControlledMedicine` overriding `requires_prescriber_code()`; `Medicine.create()` / `Medicine.from_dict()` subtype mapping; `MedicineError`, `InvalidMedicineError`, `DuplicateMedicineError` (all derive from `ValueError` for the GUI boundary).
   - `domain/branch.py`: `Branch` with `branch_id`/`branch_name`, validation, `from_dict`/`to_dict`.
@@ -17,13 +17,14 @@
   - `gui/receive_stock.py`: stock receipt screen; medicine/branch dropdowns; branch options sourced from `report_service.get_branch_stock_summary()` per the 2026-11-19 agreement so empty branches still appear; branch stock listing.
   - `tests/test_member2_gui.py`: 13 tkinter smoke tests driving both screens against a temporary database with `messagebox` mocked (no dialogs block the run).
 - **Feature**: medicine catalogue registration and lookup; branch and stock domain rules including per-branch quantities and the low-stock boundary (`quantity <= reorder_level`); medicine registration and stock receiving screens.
-- **Tests**: `py -m unittest discover -s tests` -> 120 tests passed (55 existing + 52 domain/service + 13 GUI).
+- **Tests**: `py -m unittest discover -s tests` -> 120 tests passed (55 existing + 52 domain/service + 13 GUI); 122 after the navigation follow-up below.
 - **Decisions / confirmations**
   - MedicineService ownership confirmed as Member 2 per interface contract section 4 (supersedes the earlier task-allocation question).
   - MedicineService returns domain objects, not dictionaries; `Medicine.to_dict()` is available for screens that prefer row shape.
   - ReportService agreed formats verified as already implemented in `StockRepository.get_branch_stock_summary()`; Matilda's low-stock screen already sources its branch filter from the summary.
   - No changes to shared interfaces, repositories or schema.
-- **Next steps**: confirm constructor with Timothy for the `ApplicationServices` facade (`MedicineService(medicine_repository)`; `StockService` built with the shared repositories); restyle both screens onto Matilda's `base_screen.py` once it lands; joint GUI walkthrough with Member 4.
+- **Follow-up (2026-11-20, branch `member-2-navigation-refresh`)**: after PR #7 merged and Timothy's `MainWindow` navigation landed, both of my screens now inherit `app.base_screen.BaseScreen` and expose the optional `refresh()` hook that `show_screen()` calls on navigation, so their catalogue, dropdowns and stock listings reload when the user switches screens; 2 navigation tests added (suite now 122). Conrad's `create_prescription.py` and `dispense.py` have the same gap (`ttk.Frame`, no `refresh()`) — flagged for him, not changed by me.
+- **Next steps**: joint GUI walkthrough with Member 4; watch Conrad's screens adopt `BaseScreen`/`refresh()` for consistency.
 
 ## 2026-11-18 - Member 3 (Conrad) - Prescription and dispensing
 
