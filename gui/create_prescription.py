@@ -11,16 +11,15 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from typing import Any
 
+from app.base_screen import BaseScreen
 from domain.prescription import PrescriptionError
 
 
-class CreatePrescriptionScreen(ttk.Frame):
+class CreatePrescriptionScreen(BaseScreen):
     """Form for a fictional patient, branch, prescriber and medicine lines."""
 
     def __init__(self, parent: Any, services: Any) -> None:
-        super().__init__(parent)
-        self.parent = parent
-        self.services = services
+        super().__init__(parent, services)
         self._lines: list[tuple[str, int]] = []
         self._build_widgets()
 
@@ -168,6 +167,15 @@ class CreatePrescriptionScreen(ttk.Frame):
     # ------------------------------------------------------------------ #
     # Display helpers
     # ------------------------------------------------------------------ #
+    def refresh(self) -> None:
+        """Navigation hook called by ``MainWindow.show_screen``.
+
+        A new-prescription form has no persisted listing to reload. We only
+        redraw the in-progress lines so switching screens keeps the user's
+        unfinished work instead of clearing it.
+        """
+        self._refresh_lines()
+
     def _refresh_lines(self) -> None:
         for item in self.line_tree.get_children():
             self.line_tree.delete(item)
