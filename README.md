@@ -8,7 +8,7 @@
 - **GUI:** Tkinter (desktop)
 - **Database:** SQLite
 
-> Status: This project is under active development. The database foundation, repositories, prescription domain/service and some GUI screens are implemented. The application entry point, several domain classes, services and GUI screens are still incomplete.
+> Status: Core application features are implemented. The Tkinter application can be launched with `python main.py`. Final integration testing and manual GUI walkthrough are still recommended.
 
 ---
 
@@ -36,17 +36,15 @@ The project follows a layered architecture:
 
 ### Main features
 
-Implemented or partially implemented:
+Implemented:
 - Database schema, connection management and seed data.
 - Repositories for medicines, branches, stock, prescriptions and authorised prescribers.
-- Prescription creation and atomic dispensing.
-- Low-stock report screen (on `origin/member-4-gui`).
-
-Planned or incomplete:
-- Medicine, branch and stock domain classes.
-- MedicineService, StockService and ReportService.
+- Medicine, branch, stock and prescription domain classes.
+- MedicineService, StockService, ReportService and PrescriptionService.
 - ApplicationServices facade and application entry point.
-- Main window and several feature screens.
+- Tkinter screens for dashboard, medicine registration, stock receiving, prescription creation, dispensing and low-stock reporting.
+- Low-stock reporting with branch filtering.
+- Atomic prescription dispensing with rollback.
 
 ## 3. Technologies used
 
@@ -56,7 +54,7 @@ Planned or incomplete:
 - unittest (Python standard library, testing)
 - Git and GitHub (version control and collaboration)
 
-No third-party dependencies are required at this stage; `requirements.txt` is currently empty.
+No third-party dependencies are required; `requirements.txt` is currently empty.
 
 ## 4. Group members and responsibilities
 
@@ -66,13 +64,54 @@ No third-party dependencies are required at this stage; `requirements.txt` is cu
 4. **Matilda** - Tkinter GUI coordination.
 5. **Cindy** - Database, repositories, StockService, ReportService, database integration, testing and documentation.
 
+### 5.1 Member 3 contribution - Prescription and dispensing (Conrad)
+
+This section describes the prescription and dispensing part; Cindy owns the database and reporting parts of this README.
+
+**Files owned by Conrad**
+
+- domain/prescription.py - Prescription, PrescriptionLine, status constants, valid transitions and prescription exceptions.
+- services/prescription_service.py - the agreed public service methods and the dispensing transaction.
+- gui/create_prescription.py - CreatePrescriptionScreen(parent, services).
+- gui/dispense.py - DispenseScreen(parent, services).
+- 	ests/test_prescription.py and 	ests/test_dispensing.py - prescription and dispensing tests.
+- database/repositories/prescriber_repository.py - allow-list lookup (reviewed by Cindy).
+
+**What is implemented**
+
+- Multi-line prescriptions tied to one branch and a fictional patient identifier.
+- pending, dispensed and cancelled statuses; only pending prescriptions can dispense or cancel.
+- Controlled medicines require an authorised simulated prescriber code; ordinary medicines do not.
+- All-or-nothing dispensing: one SQLite transaction covers status checks, controlled-medicine authorisation, stock checks, conditional stock reductions and the conditional status update. If any step fails, everything rolls back and no stock is deducted.
+
+**Agreed public methods**
+
+`python
+PrescriptionService(prescription_repository, medicine_repository, stock_repository)
+
+create_prescription(patient_identifier, branch_id, prescriber_code, lines) -> Prescription
+dispense_prescription(prescription_id) -> Prescription
+cancel_prescription(prescription_id) -> Prescription
+get_prescription(prescription_id) -> Prescription | None
+`
+
+**Tests**
+
+`powershell
+py -m unittest tests.test_prescription tests.test_dispensing -v
+`
+
+Tests use temporary databases, never the live data/pharmacy.db.
+
+---
+
 ## 5. Project folder structure
 
 ```text
 UCU-Campus-Pharmacy-Management-System/
 |-- app/            # Application entry points and shared screen services
-|   |-- base_screen.py   # currently empty placeholder
-|   +-- services.py      # ApplicationServices facade, currently empty placeholder
+|   |-- base_screen.py
+|   +-- services.py      # ApplicationServices facade
 |-- data/            # SQLite database file(s), generated at runtime, not committed
 |-- database/        # Connection, schema, seed data and repositories
 |   |-- connection.py
@@ -85,34 +124,40 @@ UCU-Campus-Pharmacy-Management-System/
 |       |-- prescription_repository.py
 |       +-- stock_repository.py
 |-- domain/          # Core pharmacy domain models
-|   |-- branch.py         # currently empty placeholder
-|   |-- medicine.py       # currently empty placeholder
-|   |-- prescription.py   # implemented
-|   +-- stock.py          # currently empty placeholder
+|   |-- branch.py
+|   |-- medicine.py
+|   |-- prescription.py
+|   +-- stock.py
 |-- gui/             # Tkinter screens
-|   |-- create_prescription.py   # implemented
-|   |-- dispense.py              # implemented
-|   |-- low_stock.py             # implemented on origin/member-4-gui
-|   |-- main_window.py           # currently empty placeholder
-|   |-- receive_stock.py         # currently empty placeholder
-|   +-- register_medicine.py     # currently empty placeholder
+|   |-- create_prescription.py
+|   |-- dashboard.py
+|   |-- dispense.py
+|   |-- low_stock.py
+|   |-- main_window.py
+|   |-- receive_stock.py
+|   +-- register_medicine.py
 |-- services/        # Business services
-|   |-- medicine_service.py      # currently empty placeholder
-|   |-- prescription_service.py  # implemented
-|   |-- report_service.py        # currently empty placeholder
-|   +-- stock_service.py         # currently empty placeholder
+|   |-- medicine_service.py
+|   |-- prescription_service.py
+|   |-- report_service.py
+|   +-- stock_service.py
 |-- tests/           # Unit and integration tests
 |   |-- test_dispensing.py
 |   |-- test_medicine.py
+|   |-- test_member2_gui.py
 |   |-- test_member5_database.py
 |   |-- test_prescription.py
-|   +-- test_stock.py
-|-- docs/            # Design, requirements and database design
-|   |-- database_design.md       # implemented
-|   |-- design.md                # empty on main; full version on origin/member-1-architecture
-|   |-- requirements.md          # empty on main; full version on origin/member-1-architecture
-|   +-- test_report.md           # empty
-|-- main.py          # Application entry point, currently empty placeholder
+|   |-- test_stock.py
+|   |-- test_cindy_stock_report.py
+|   +-- test_cindy_stock_service.py
+|-- docs/            # Design, requirements, database design and diagrams
+|   |-- database_design.md
+|   |-- design.md
+|   |-- interface_contract.md
+|   |-- requirements.md
+|   |-- test_report.md
+|   +-- diagrams/
+|-- main.py          # Application entry point
 |-- README.md
 |-- requirements.txt
 +-- task_log.md
@@ -123,7 +168,7 @@ UCU-Campus-Pharmacy-Management-System/
 The system uses four layers:
 
 1. **GUI (`gui/`)** - Tkinter screens, input collection, navigation, messages and display refresh. No SQL.
-2. **Application services (`app/services.py`)** - intended composition point for repositories and services. Not yet implemented.
+2. **Application services (`app/services.py`)** - composition point for repositories and services.
 3. **Services and domain (`services/`, `domain/`)** - services coordinate use cases; domain objects enforce object-level rules. No tkinter imports.
 4. **Repositories and database (`database/`)** - parameterised SQLite access, row mapping, connection management and transaction boundaries.
 
@@ -187,7 +232,7 @@ deactivate
 
 ## 9. Database initialization and sample data
 
-The schema is implemented in `database/schema.sql` and is created automatically when a database is initialised.
+The schema is implemented in `database/schema.sql` and is created automatically when the application starts.
 
 Seed fictional development data with:
 
@@ -201,11 +246,13 @@ Do not commit generated `.db`, `.sqlite` or `.sqlite3` files.
 
 ## 10. How to run the application
 
-The application is not yet fully runnable. `main.py`, `app/services.py`, `gui/main_window.py` and several feature screens are still placeholders.
+Run the application with:
 
-Prescription screens exist in `gui/create_prescription.py` and `gui/dispense.py`, but they require the shared application services and main window integration that are not yet implemented.
+```powershell
+python main.py
+```
 
-Do not run `python main.py` expecting a complete application.
+The application initialises the database, seeds fictional data, creates the shared services and opens the Tkinter main window.
 
 ## 11. How to run the available tests
 
@@ -215,11 +262,12 @@ Run all tests:
 python -m unittest discover -s tests -v
 ```
 
-Implemented tests:
-- Cindy's database/repository tests: `tests/test_member5_database.py`
-- Conrad's prescription and dispensing tests: `tests/test_prescription.py` and `tests/test_dispensing.py`
-
-Other test files are currently empty placeholders.
+Implemented test suites include:
+- Medicine and stock domain tests.
+- Prescription and dispensing tests.
+- Database and repository integration tests.
+- StockService and ReportService tests.
+- GUI smoke tests.
 
 Tests use temporary databases and do not modify the live demonstration database.
 
@@ -228,18 +276,17 @@ Tests use temporary databases and do not modify the live demonstration database.
 Completed:
 - Database schema, connection management and seed data.
 - Repositories for medicines, branches, stock, prescriptions and authorised prescribers.
-- Prescription domain and PrescriptionService.
-- Create-prescription and dispense GUI screens.
-- Low-stock GUI screen on `origin/member-4-gui`.
-- Database design documentation.
+- Medicine, branch, stock and prescription domain classes.
+- MedicineService, StockService, ReportService and PrescriptionService.
+- ApplicationServices facade and application entry point.
+- Tkinter screens for dashboard, medicine registration, stock receiving, prescription creation, dispensing and low-stock reporting.
+- Low-stock reporting with branch filtering.
+- Atomic prescription dispensing with rollback.
+- Database design, requirements, design and interface contract documentation.
 
-Incomplete:
-- Medicine, branch and stock domain classes.
-- MedicineService, StockService and ReportService.
-- ApplicationServices facade.
-- Main window and remaining GUI screens.
-- Medicine registration and stock receiving screens.
-- Application entry point.
+Remaining work:
+- Final manual GUI walkthrough and integration verification.
+- Any fixes discovered during integration.
 
 ## 13. GitHub repository and contribution workflow
 
@@ -261,4 +308,4 @@ The system uses fictional patient identifiers and simulated prescriber codes onl
 
 ---
 
-Last updated: 19 November 2026.
+Last updated: 21 November 2026.
