@@ -86,13 +86,17 @@ class LoginScreen(BaseScreen):
         centre = tk.Frame(background, bg=NAVY_DARK)
         centre.pack(fill="both", expand=True)
 
-        card = tk.Frame(centre, bg=WHITE, width=540)
+        # pack_propagate(False) means the card needs BOTH dimensions; with
+        # only a width it collapses to 1x1 and the whole form is clipped.
+        card = tk.Frame(centre, bg=WHITE, width=540, height=540)
         card.pack(pady=(6, 18))
         card.pack_propagate(False)
 
         self._build_brand_header(card)
-        self._build_form(card)
+        # Pack the footer first (side=bottom) so the expanding form cannot
+        # squeeze it out of the card.
         self._build_footer(card)
+        self._build_form(card)
 
     def _build_top_bar(self, parent: tk.Widget) -> None:
         bar = tk.Frame(parent, bg=NAVY, height=46)
@@ -274,7 +278,7 @@ class LoginScreen(BaseScreen):
 
     def _build_footer(self, card: tk.Widget) -> None:
         footer = tk.Frame(card, bg=NAVY)
-        footer.pack(fill="x")
+        footer.pack(fill="x", side="bottom")
         tk.Label(
             footer,
             text="© 2026 Uganda Christian University   -   Pharmacy Management System",
