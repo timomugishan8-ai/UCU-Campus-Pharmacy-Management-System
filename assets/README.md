@@ -24,3 +24,11 @@ tagline) used in the white branding header of the login card. Supplied as
 `UCU_logo.PNG` in Downloads and resized to 334 x 84 px so it fits the
 366 px-wide card. If the file is missing, the login falls back to a
 Canvas-drawn teal pill logo.
+
+## `ucu_crest.png`
+
+The crest-only crop of the official logo (56 x 68 px), used in the narrow
+application sidebar instead of the old drawn teal pill. The full lockup is
+too wide for a 250 px sidebar, so the crest is paired with the app's own
+"UCU Pharmacy / Management System" labels. `gui/main_window.py` falls back
+to the drawn pill if this asset is missing.
