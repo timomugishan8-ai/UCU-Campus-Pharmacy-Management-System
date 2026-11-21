@@ -23,11 +23,43 @@ BRANCHES = [
 
 # Fictional medicines: (code, name, unit_price, reorder_level, is_controlled)
 MEDICINES = [
+    # Original demonstration set.
     ("MED-001", "Paracetamol 500mg", 2.50, 20, 0),
     ("MED-002", "Amoxicillin 250mg", 5.00, 15, 0),
     ("MED-003", "Ibuprofen 200mg", 3.25, 10, 0),
     ("MED-004", "Morphine 10mg", 12.00, 5, 1),
     ("MED-005", "Diazepam 5mg", 8.50, 5, 1),
+    # Malaria - the leading outpatient diagnosis in Uganda.
+    ("MED-006", "Coartem 20/120mg", 6.50, 25, 0),
+    ("MED-007", "Fansidar tablets", 4.00, 15, 0),
+    ("MED-008", "Quinine 300mg tablets", 5.50, 10, 0),
+    # Common antibiotics.
+    ("MED-009", "Metronidazole 400mg", 2.75, 20, 0),
+    ("MED-010", "Cotrimoxazole 480mg", 3.50, 15, 0),
+    ("MED-011", "Ciprofloxacin 500mg", 6.00, 12, 0),
+    # Pain and inflammation.
+    ("MED-012", "Diclofenac 50mg", 3.00, 15, 0),
+    ("MED-013", "Tramadol 50mg", 7.50, 5, 1),
+    # Gastro-intestinal.
+    ("MED-014", "Omeprazole 20mg", 4.50, 12, 0),
+    # Child health.
+    ("MED-015", "ORS sachet", 1.25, 30, 0),
+    ("MED-016", "Zinc 20mg dispersible", 1.75, 25, 0),
+    ("MED-017", "Paracetamol syrup 120mg/5ml", 2.25, 20, 0),
+    # Deworming and ante-natal care.
+    ("MED-018", "Albendazole 400mg", 2.50, 15, 0),
+    ("MED-019", "Ferrous sulphate + Folic acid", 2.00, 25, 0),
+    # Chronic care.
+    ("MED-020", "Amlodipine 5mg", 5.00, 12, 0),
+    ("MED-021", "Metformin 500mg", 5.50, 12, 0),
+    ("MED-022", "Prednisolone 5mg", 3.25, 10, 0),
+    # Respiratory.
+    ("MED-023", "Salbutamol inhaler 100mcg", 9.00, 8, 0),
+    # TB and HIV programmes.
+    ("MED-024", "Rifampicin/Isoniazid 150/75mg", 8.00, 10, 0),
+    ("MED-025", "Tenofovir/Lamivudine/Dolutegravir", 14.00, 6, 0),
+    # Codeine preparation - controlled like morphine and diazepam.
+    ("MED-026", "Codeine cough syrup 15mg/5ml", 7.00, 5, 1),
 ]
 
 # Fictional stock: (medicine_code, branch_id, quantity)
@@ -40,6 +72,33 @@ STOCK = [
     ("MED-004", 1, 10),
     ("MED-004", 2, 3),
     ("MED-005", 1, 6),
+    # Main Campus Pharmacy (branch 1): the rest of the catalogue.
+    ("MED-006", 1, 45),
+    ("MED-007", 1, 12),   # low stock: 12 <= reorder_level 15
+    ("MED-008", 1, 14),
+    ("MED-009", 1, 30),
+    ("MED-010", 1, 22),
+    ("MED-011", 1, 16),
+    ("MED-012", 1, 24),
+    ("MED-013", 1, 9),
+    ("MED-014", 1, 18),
+    ("MED-015", 1, 60),
+    ("MED-016", 1, 38),
+    ("MED-017", 1, 28),
+    ("MED-018", 1, 21),
+    ("MED-019", 1, 40),
+    ("MED-020", 1, 17),
+    ("MED-021", 1, 15),
+    ("MED-022", 1, 14),
+    ("MED-023", 1, 7),    # low stock: 7 <= reorder_level 8
+    ("MED-024", 1, 13),
+    ("MED-025", 1, 9),
+    ("MED-026", 1, 4),    # low stock: 4 <= reorder_level 5
+    # East Campus Pharmacy (branch 2): the faster-moving lines only.
+    ("MED-006", 2, 40),
+    ("MED-009", 2, 26),
+    ("MED-015", 2, 45),
+    ("MED-019", 2, 30),
 ]
 
 # Fictional authorised prescriber (allow-list)

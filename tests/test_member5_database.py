@@ -10,7 +10,7 @@ from database.repositories.medicine_repository import MedicineRepository
 from database.repositories.branch_repository import BranchRepository
 from database.repositories.stock_repository import StockRepository
 from database.repositories.prescription_repository import PrescriptionRepository
-from database.seed_data import seed
+from database.seed_data import BRANCHES, MEDICINES, PRESCRIBERS, STOCK, seed
 
 
 class Member5DatabaseTests(unittest.TestCase):
@@ -191,10 +191,13 @@ class Member5DatabaseTests(unittest.TestCase):
                 "SELECT COUNT(*) FROM authorised_prescribers"
             ).fetchone()[0]
 
-        self.assertEqual(branches, 2)
-        self.assertEqual(medicines, 5)
-        self.assertEqual(stock, 8)
-        self.assertEqual(prescribers, 1)
+        # Seeding twice must leave exactly one copy of each seed row.
+        # Compared against the seed lists themselves so the check keeps
+        # working when the catalogue grows (Member 2 added Ugandan medicines).
+        self.assertEqual(branches, len(BRANCHES))
+        self.assertEqual(medicines, len(MEDICINES))
+        self.assertEqual(stock, len(STOCK))
+        self.assertEqual(prescribers, len(PRESCRIBERS))
 
 
 if __name__ == "__main__":
