@@ -16,16 +16,53 @@ Two pieces:
 
 First-run bootstrap: when the account table is empty the screen offers
 "Create the first administrator" instead of shipping a default password.
+
+Visual design (2026-11-21): inspired by the UCU Alpha portal log-in page —
+dark university-branded background, a centred white card with a crest and
+the UCU tagline, and a bright pink action button. Drawn entirely with
+standard tkinter widgets: no image files and no third-party libraries.
 """
 
 from __future__ import annotations
 
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import messagebox
 from typing import Any, Optional
 
 from app.base_screen import BaseScreen
 from domain.user import StaffUser
+
+NAVY = "#0F2A43"
+NAVY_DARK = "#0A1E30"
+NAVY_MID = "#153451"
+TEAL = "#16A085"
+PINK = "#E91E63"
+PINK_DARK = "#C2185B"
+WHITE = "#FFFFFF"
+LIGHT = "#F1F5F9"
+BORDER = "#CBD5E1"
+MUTED = "#64748B"
+TEXT = "#1F2937"
+GOLD = "#F5C518"
+
+
+class BrandedButton(tk.Button):
+    """A tk.Button with a ttk-compatible ``state()`` method.
+
+    Custom colours need a tk.Button, but the existing auth tests (and the
+    rest of the GUI contract) call ``state([...])`` like a ttk button. This
+    small adapter keeps that API so the redesign changes only appearance.
+    """
+
+    def state(self, *args: Any) -> list[str]:
+        if args:
+            states = args[0] if isinstance(args[0], (list, tuple)) else args
+            if "disabled" in states:
+                self.configure(state="disabled")
+            elif "!disabled" in states:
+                self.configure(state="normal")
+            return []
+        return ["disabled"] if str(self.cget("state")) == "disabled" else ["!disabled"]
 
 
 class LoginScreen(BaseScreen):
@@ -37,84 +74,259 @@ class LoginScreen(BaseScreen):
         self._build_widgets()
         self._apply_mode()
 
-    # ------------------------------------------------------------------ #
+    # ------------------------------------------------------------------
     # Widget construction
-    # ------------------------------------------------------------------ #
+    # ------------------------------------------------------------------
     def _build_widgets(self) -> None:
-        self.configure(padding=40)
+        background = tk.Frame(self, bg=NAVY_DARK)
+        background.pack(fill="both", expand=True)
 
-        card = ttk.Frame(self)
-        card.pack(expand=True)
+        self._build_top_bar(background)
 
-        ttk.Label(
-            card,
-            text="UCU Pharmacy Management System",
-            font=("Segoe UI", 15, "bold"),
-        ).grid(row=0, column=0, columnspan=2, pady=(0, 4))
-        ttk.Label(
-            card,
-            text="Sign in to continue",
-            foreground="#5B6B7C",
-        ).grid(row=1, column=0, columnspan=2, pady=(0, 18))
+        centre = tk.Frame(background, bg=NAVY_DARK)
+        centre.pack(fill="both", expand=True)
 
-        ttk.Label(card, text="Username:").grid(row=2, column=0, sticky="w", pady=4)
-        self.username_var = tk.StringVar()
-        ttk.Entry(card, textvariable=self.username_var, width=28).grid(
-            row=2, column=1, sticky="ew", padx=(10, 0), pady=4
-        )
+        card = tk.Frame(centre, bg=WHITE, width=540)
+        card.pack(pady=(6, 18))
+        card.pack_propagate(False)
 
-        ttk.Label(card, text="Password:").grid(row=3, column=0, sticky="w", pady=4)
-        self.password_var = tk.StringVar()
-        ttk.Entry(card, textvariable=self.password_var, show="*", width=28).grid(
-            row=3, column=1, sticky="ew", padx=(10, 0), pady=4
-        )
+        self._build_brand_header(card)
+        self._build_form(card)
+        self._build_footer(card)
 
-        ttk.Label(card, text="Confirm password:").grid(
-            row=4, column=0, sticky="w", pady=4
-        )
-        self.confirm_var = tk.StringVar()
-        ttk.Entry(card, textvariable=self.confirm_var, show="*", width=28).grid(
-            row=4, column=1, sticky="ew", padx=(10, 0), pady=4
-        )
-
-        buttons = ttk.Frame(card)
-        buttons.grid(row=5, column=0, columnspan=2, pady=(18, 0))
-
-        self.sign_in_button = ttk.Button(
-            buttons, text="Sign in", command=self.on_sign_in_clicked
-        )
-        self.sign_in_button.pack(side="left", padx=(0, 8))
-        self.bootstrap_button = ttk.Button(
-            buttons,
-            text="Create first administrator",
-            command=self.on_create_first_admin_clicked,
-        )
-        self.bootstrap_button.pack(side="left")
-
-        self.status_label = ttk.Label(
-            card,
-            text="",
-            foreground="#B03A2E",
+    def _build_top_bar(self, parent: tk.Widget) -> None:
+        bar = tk.Frame(parent, bg=NAVY, height=46)
+        bar.pack(fill="x")
+        bar.pack_propagate(False)
+        tk.Label(
+            bar,
+            text="UCU PHARMACY   |   Management Information System",
+            bg=NAVY,
+            fg=WHITE,
+            font=("Segoe UI", 11, "bold"),
+        ).pack(side="left", padx=24)
+        tk.Label(
+            bar,
+            text="Secure staff access",
+            bg=NAVY,
+            fg="#9FB3C8",
             font=("Segoe UI", 9),
-        )
-        self.status_label.grid(row=6, column=0, columnspan=2, pady=(12, 0))
+        ).pack(side="right", padx=24)
 
+    def _build_brand_header(self, card: tk.Widget) -> None:
+        header = tk.Frame(card, bg=WHITE, height=118)
+        header.pack(fill="x")
+        header.pack_propagate(False)
+
+        crest = tk.Canvas(
+            header, width=74, height=74, bg=WHITE, highlightthickness=0
+        )
+        crest.pack(side="left", padx=(28, 14), pady=22)
+        # A simple shield/cross emblem drawn with canvas primitives.
+        crest.create_oval(6, 4, 68, 68, fill=TEAL, outline=NAVY, width=2)
+        crest.create_rectangle(33, 16, 41, 56, fill=WHITE, outline="")
+        crest.create_rectangle(18, 32, 56, 40, fill=WHITE, outline="")
+        crest.create_text(
+            37, 62, text="UCU", fill=GOLD,
+            font=("Segoe UI", 7, "bold"),
+        )
+
+        names = tk.Frame(header, bg=WHITE)
+        names.pack(side="left", pady=(22, 0))
+        tk.Label(
+            names,
+            text="UGANDA CHRISTIAN UNIVERSITY",
+            bg=WHITE,
+            fg=NAVY,
+            font=("Segoe UI", 15, "bold"),
+        ).pack(anchor="w")
+        tk.Label(
+            names,
+            text="A Centre of Excellence in the Heart of Africa",
+            bg=WHITE,
+            fg=PINK,
+            font=("Segoe UI", 9, "italic"),
+        ).pack(anchor="w", pady=(4, 0))
+
+        tk.Frame(card, bg=TEAL, height=4).pack(fill="x")
+
+    def _build_form(self, card: tk.Widget) -> None:
+        form = tk.Frame(card, bg=WHITE)
+        form.pack(fill="both", expand=True, padx=34, pady=(20, 12))
+
+        self.title_label = tk.Label(
+            form,
+            text="Welcome back",
+            bg=WHITE,
+            fg=TEXT,
+            font=("Segoe UI", 18, "bold"),
+        )
+        self.title_label.pack(anchor="w")
+        self.subtitle_label = tk.Label(
+            form,
+            text="Sign in to continue to your pharmacy workspace",
+            bg=WHITE,
+            fg=MUTED,
+            font=("Segoe UI", 10),
+        )
+        self.subtitle_label.pack(anchor="w", pady=(2, 18))
+
+        self.username_var = tk.StringVar()
+        self.password_var = tk.StringVar()
+        self.confirm_var = tk.StringVar()
+
+        self._field(form, "Username", self.username_var, False, 0)
+        self._field(form, "Password", self.password_var, True, 1)
+        self.confirm_row = self._field(
+            form, "Confirm password", self.confirm_var, True, 2
+        )
+
+        actions = tk.Frame(form, bg=WHITE)
+        actions.pack(fill="x", pady=(22, 0))
+        self.actions_row = actions
+        self.sign_in_button = BrandedButton(
+            actions,
+            text="SIGN IN  >",
+            command=self.on_sign_in_clicked,
+            bg=PINK,
+            fg=WHITE,
+            activebackground=PINK_DARK,
+            activeforeground=WHITE,
+            relief="flat",
+            borderwidth=0,
+            font=("Segoe UI", 10, "bold"),
+            padx=20,
+            pady=9,
+            cursor="hand2",
+        )
+        self.sign_in_button.pack(side="left")
+        self.bootstrap_button = BrandedButton(
+            actions,
+            text="CREATE ADMINISTRATOR",
+            command=self.on_create_first_admin_clicked,
+            bg=TEAL,
+            fg=WHITE,
+            activebackground="#0E7C68",
+            activeforeground=WHITE,
+            relief="flat",
+            borderwidth=0,
+            font=("Segoe UI", 10, "bold"),
+            padx=14,
+            pady=9,
+            cursor="hand2",
+        )
+        self.bootstrap_button.pack(side="left", padx=(10, 0))
+
+        self.status_label = tk.Label(
+            form,
+            text="",
+            bg=WHITE,
+            fg="#B03A2E",
+            font=("Segoe UI", 9),
+            wraplength=460,
+            justify="left",
+        )
+        self.status_label.pack(anchor="w", pady=(12, 0))
+
+        tk.Label(
+            form,
+            text="By signing in, I agree to the system usage terms and conditions.",
+            bg=WHITE,
+            fg=MUTED,
+            font=("Segoe UI", 8),
+        ).pack(anchor="w", pady=(10, 0))
+
+        # Pressing Enter submits whichever action is currently enabled.
+        self._bind_enter(self)
+
+    def _field(
+        self,
+        parent: tk.Widget,
+        label: str,
+        variable: tk.StringVar,
+        secret: bool,
+        row: int,
+    ) -> tk.Frame:
+        wrapper = tk.Frame(parent, bg=WHITE)
+        wrapper.pack(fill="x", pady=(0, 10))
+        tk.Label(
+            wrapper,
+            text=label.upper(),
+            bg=WHITE,
+            fg=NAVY,
+            font=("Segoe UI", 8, "bold"),
+        ).pack(anchor="w")
+        entry = tk.Entry(
+            wrapper,
+            textvariable=variable,
+            show="*" if secret else "",
+            bg=LIGHT,
+            fg=TEXT,
+            relief="flat",
+            highlightthickness=1,
+            highlightbackground=BORDER,
+            highlightcolor=TEAL,
+            font=("Segoe UI", 11),
+            width=38,
+        )
+        entry.pack(fill="x", pady=(3, 0), ipady=6)
+        return wrapper
+
+    def _build_footer(self, card: tk.Widget) -> None:
+        footer = tk.Frame(card, bg=NAVY)
+        footer.pack(fill="x")
+        tk.Label(
+            footer,
+            text="© 2026 Uganda Christian University   -   Pharmacy Management System",
+            bg=NAVY,
+            fg="#9FB3C8",
+            font=("Segoe UI", 8),
+        ).pack(pady=9)
+
+    def _bind_enter(self, widget: tk.Widget) -> None:
+        for child in widget.winfo_children():
+            if isinstance(child, tk.Entry):
+                child.bind(
+                    "<Return>",
+                    lambda _event: (
+                        self.on_create_first_admin_clicked()
+                        if self._bootstrap_mode
+                        else self.on_sign_in_clicked()
+                    ),
+                )
+            else:
+                self._bind_enter(child)
+
+    # ------------------------------------------------------------------
+    # Mode
+    # ------------------------------------------------------------------
     def _apply_mode(self) -> None:
         """Bootstrap mode shows the create button and hides sign-in."""
         if self._bootstrap_mode:
             self.sign_in_button.state(["disabled"])
             self.bootstrap_button.state(["!disabled"])
+            self.confirm_row.pack(fill="x", pady=(0, 10), before=self.actions_row)
+            self.title_label.configure(text="Create the first administrator")
+            self.subtitle_label.configure(
+                text="No accounts exist yet - set up the administrator account."
+            )
             self.status_label.configure(
-                text="No accounts exist yet - create the first administrator.",
-                foreground="#5B6B7C",
+                text="First run: choose a username and a strong password.",
+                fg=MUTED,
             )
         else:
             self.sign_in_button.state(["!disabled"])
             self.bootstrap_button.state(["disabled"])
+            self.confirm_row.pack_forget()
+            self.title_label.configure(text="Welcome back")
+            self.subtitle_label.configure(
+                text="Sign in to continue to your pharmacy workspace"
+            )
+            self.status_label.configure(text="")
 
-    # ------------------------------------------------------------------ #
+    # ------------------------------------------------------------------
     # Event handlers
-    # ------------------------------------------------------------------ #
+    # ------------------------------------------------------------------
     def on_sign_in_clicked(self) -> None:
         """Authenticate and close the gate on success."""
         username = self.username_var.get().strip()
@@ -146,9 +358,7 @@ class LoginScreen(BaseScreen):
             )
             return
         if password != confirm:
-            messagebox.showerror(
-                "Mismatch", "The passwords do not match."
-            )
+            messagebox.showerror("Mismatch", "The passwords do not match.")
             return
 
         try:
@@ -168,9 +378,9 @@ class LoginScreen(BaseScreen):
         self.services.current_user = user
         self.winfo_toplevel().destroy()
 
-    # ------------------------------------------------------------------ #
+    # ------------------------------------------------------------------
     # Display helpers
-    # ------------------------------------------------------------------ #
+    # ------------------------------------------------------------------
     def refresh(self) -> None:
         """Navigation hook (the gate is standalone; kept for contract parity)."""
         self._apply_mode()
@@ -185,8 +395,18 @@ def ask_for_login(services: Any) -> Optional[StaffUser]:
     """
     root = tk.Tk()
     root.title("Sign in - UCU Pharmacy Management System")
-    root.geometry("460x360")
-    root.minsize(460, 360)
+    root.configure(bg=NAVY_DARK)
+    root.geometry("900x620")
+    root.minsize(820, 580)
+    root.resizable(False, False)
+
+    # Centre the gate on the screen.
+    root.update_idletasks()
+    width, height = 900, 620
+    x = (root.winfo_screenwidth() // 2) - (width // 2)
+    y = (root.winfo_screenheight() // 2) - (height // 2)
+    root.geometry(f"{width}x{height}+{x}+{y}")
+
     screen = LoginScreen(root, services)
     # A frame must be given geometry explicitly: MainWindow uses place()
     # to mount its screens, but this gate is standalone, so pack the
