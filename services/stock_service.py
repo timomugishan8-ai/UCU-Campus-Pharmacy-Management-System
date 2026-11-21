@@ -13,8 +13,8 @@ class StockService:
     def __init__(
         self,
         stock_repository: StockRepository,
-        medicine_repository: Any = None,
-        branch_repository: Any = None,
+        medicine_repository: Any,
+        branch_repository: Any,
         database: Any = None,
     ) -> None:
         self.stock_repository = stock_repository

@@ -101,6 +101,21 @@ class CindyStockServiceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.service.get_low_stock(999)
 
+    def test_constructor_requires_medicine_and_branch_repositories(self):
+        with self.assertRaises(TypeError):
+            StockService(self.stock_repo)
+
+    def test_constructor_accepts_required_dependencies(self):
+        service = StockService(
+            self.stock_repo, self.medicine_repo, self.branch_repo
+        )
+        self.assertIs(service.stock_repository, self.stock_repo)
+        self.assertIs(service.medicine_repository, self.medicine_repo)
+        self.assertIs(service.branch_repository, self.branch_repo)
+
+
+
+
 
 if __name__ == "__main__":
     unittest.main()

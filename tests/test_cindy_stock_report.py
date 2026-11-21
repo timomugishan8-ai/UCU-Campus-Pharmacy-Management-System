@@ -134,6 +134,18 @@ class CindyStockReportTests(unittest.TestCase):
             pass
         self.assertEqual(self.stock_repo.get_quantity("M1", self.branch_one), 3)
 
+    def test_report_invalid_branch_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            self.report_service.get_low_stock_report(branch_id=999)
+
+    def test_report_valid_branch_filter_returns_rows(self):
+        rows = self.report_service.get_low_stock_report(branch_id=self.branch_one)
+        self.assertEqual(len(rows), 2)
+        self.assertTrue(all(row["branch_id"] == self.branch_one for row in rows))
+
+
+
+
 
 if __name__ == "__main__":
     unittest.main()
