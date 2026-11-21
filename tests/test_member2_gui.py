@@ -184,6 +184,26 @@ class RegisterMedicineScreenTests(ScreenTestCase):
             self.services.medicine_service.get_medicine_by_code("MED-101")
         )
 
+    @patch("gui.register_medicine.messagebox.showinfo")
+    @patch("gui.register_medicine.messagebox.showerror")
+    @patch("gui.register_medicine.messagebox.showwarning")
+    def test_navigation_refresh_hook_reloads_catalogue(
+        self, _warning, _error, _info
+    ):
+        # MainWindow.show_screen() calls an optional refresh() hook, so the
+        # screen must expose it. Medicine registered outside the screen
+        # must appear after the hook runs.
+        self.assertTrue(callable(self.screen.refresh))
+        self.services.medicine_service.register_medicine(
+            OrdinaryMedicine("MED-901", "Late addition", 1.0)
+        )
+        self.screen.refresh()
+        codes = [
+            str(self.screen.medicine_tree.item(item)["values"][0])
+            for item in self.screen.medicine_tree.get_children()
+        ]
+        self.assertIn("MED-901", codes)
+
 
 class ReceiveStockScreenTests(ScreenTestCase):
     screen_class = ReceiveStockScreen
@@ -276,6 +296,27 @@ class ReceiveStockScreenTests(ScreenTestCase):
         self.screen.refresh_options()
         self.assertIn("Satellite Clinic", self.screen.branch_combo.cget("values"))
         self.assertIn(self.branch_name, self.screen.branch_combo.cget("values"))
+
+    @patch("gui.receive_stock.messagebox.showinfo")
+    @patch("gui.receive_stock.messagebox.showerror")
+    @patch("gui.receive_stock.messagebox.showwarning")
+    def test_navigation_refresh_hook_reloads_options_and_stock(
+        self, _warning, _error, _info
+    ):
+        # MainWindow.show_screen() calls an optional refresh() hook, so the
+        # screen must expose it and pick up data changed elsewhere.
+        self.assertTrue(callable(self.screen.refresh))
+
+        self._select()
+        BranchRepository(self.db).add("New Branch")
+        self.services.stock_service.receive_stock("MED-201", self.branch_id, 10)
+
+        self.screen.refresh()
+
+        self.assertIn("New Branch", self.screen.branch_combo.cget("values"))
+        rows = self.screen.stock_tree.get_children()
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(int(self.screen.stock_tree.item(rows[0])["values"][2]), 10)
 
 
 if __name__ == "__main__":

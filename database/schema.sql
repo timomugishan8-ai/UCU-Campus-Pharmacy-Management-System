@@ -69,6 +69,20 @@ CREATE TABLE IF NOT EXISTS authorised_prescribers (
     prescriber_name TEXT
 );
 
+-- Staff accounts: one administrator creates and manages sub-users.
+-- Passwords are stored only as salted PBKDF2 hashes (never plain text).
+-- NOTE: authentication was listed as out of scope in requirements 3.2;
+-- this table is an additive proposal for group review (see PR).
+CREATE TABLE IF NOT EXISTS staff_users (
+    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    role TEXT NOT NULL CHECK (role IN ('admin', 'staff')),
+    active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1)),
+    created_by TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Useful indexes
 CREATE INDEX IF NOT EXISTS idx_stock_branch
     ON stock (branch_id);

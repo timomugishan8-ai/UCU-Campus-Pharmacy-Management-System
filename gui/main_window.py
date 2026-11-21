@@ -19,6 +19,7 @@ from gui.receive_stock import ReceiveStockScreen
 from gui.create_prescription import CreatePrescriptionScreen
 from gui.dispense import DispenseScreen
 from gui.low_stock import LowStockScreen
+from gui.user_admin import UserAdminScreen
 
 NAVY = "#0F2A43"
 NAVY_ACTIVE = "#1B3A57"
@@ -142,6 +143,7 @@ class MainWindow(tk.Tk):
             "Prescriptions": CreatePrescriptionScreen,
             "Dispense Medicine": DispenseScreen,
             "Low Stock": LowStockScreen,
+            "Users": UserAdminScreen,
         }
 
         for name, screen_class in screen_definitions.items():

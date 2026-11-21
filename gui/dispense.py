@@ -11,16 +11,15 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from typing import Any, Optional
 
+from app.base_screen import BaseScreen
 from domain.prescription import Prescription, PrescriptionError
 
 
-class DispenseScreen(ttk.Frame):
+class DispenseScreen(BaseScreen):
     """Look up a prescription and act on it through the agreed service."""
 
     def __init__(self, parent: Any, services: Any) -> None:
-        super().__init__(parent)
-        self.parent = parent
-        self.services = services
+        super().__init__(parent, services)
         self.current: Optional[Prescription] = None
         self._build_widgets()
 
@@ -155,6 +154,28 @@ class DispenseScreen(ttk.Frame):
             "Cancelled",
             f"Prescription #{prescription.prescription_id} was cancelled.",
         )
+
+    # ------------------------------------------------------------------ #
+    # Navigation hook
+    # ------------------------------------------------------------------ #
+    def refresh(self) -> None:
+        """Re-fetch the displayed prescription quietly on navigation.
+
+        Unlike ``on_find_clicked()`` this does not validate the text field or
+        show an error dialog, so switching to this screen with an empty form
+        stays silent. If a prescription is currently displayed, its status
+        is reloaded from the service in case it changed elsewhere.
+        """
+        if self.current is None:
+            return
+        try:
+            prescription = self.services.prescription_service.get_prescription(
+                self.current.prescription_id
+            )
+        except (ValueError, PrescriptionError):
+            return
+        self.current = prescription
+        self._refresh_display()
 
     # ------------------------------------------------------------------ #
     # Helpers

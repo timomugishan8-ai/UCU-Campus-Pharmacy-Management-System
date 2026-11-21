@@ -193,6 +193,15 @@ class PrescriptionService:
             raise RuntimeError("The newly created prescription could not be read back.")
         return created
 
+    def get_authorised_prescribers(self) -> list[dict[str, Any]]:
+        """Return the simulated allow-list for GUI dropdowns.
+
+        Each row has ``prescriber_code`` and ``prescriber_name``. This is a
+        read-only pass-through to the repository; authorisation decisions
+        still use the same repository inside the dispensing transaction.
+        """
+        return self.prescriber_repository.list_all()
+
     def get_prescription(self, prescription_id: int) -> Optional[Prescription]:
         """Return a prescription (with lines) or ``None`` when it is unknown."""
         pid = self._require_positive_int(prescription_id, "Prescription ID")
