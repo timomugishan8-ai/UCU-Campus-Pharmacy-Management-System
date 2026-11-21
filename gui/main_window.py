@@ -1,14 +1,15 @@
 """Main application window for the UCU Pharmacy Management System.
 
 Member 1 owns this file; Member 4 coordinates the GUI conventions used here.
-The sidebar follows the UCU Pharmacy reference (dark navy, teal pill logo) and
-one shared content area hosts every screen.
+The sidebar follows the UCU Pharmacy reference (dark navy, official UCU crest)
+and one shared content area hosts every screen.
 """
 
 from __future__ import annotations
 
 import tkinter as tk
 from tkinter import ttk
+from pathlib import Path
 from typing import Any
 
 from app.services import ApplicationServices
@@ -27,6 +28,10 @@ TEAL = "#16A085"
 CONTENT_BG = "#F5F7FA"
 MUTED = "#9FB3C8"
 TEXT_DARK = "#1F2937"
+
+# Crop of the official UCU lockup used on the login card, suitable for the
+# narrow sidebar. Falls back to a drawn teal pill if the asset is missing.
+CREST_PATH = Path(__file__).resolve().parent.parent / "assets" / "ucu_crest.png"
 
 
 class MainWindow(tk.Tk):
@@ -90,25 +95,37 @@ class MainWindow(tk.Tk):
         self.content_frame.pack(side="right", fill="both", expand=True)
 
     def _build_brand(self) -> None:
-        """Teal pill logo and the UCU Pharmacy identity."""
+        """Official UCU crest and the UCU Pharmacy identity."""
         brand = tk.Frame(self.navigation_frame, bg=NAVY)
         brand.pack(fill="x", padx=18, pady=(24, 6))
 
-        logo = tk.Canvas(
-            brand, width=44, height=44, bg=NAVY, highlightthickness=0
-        )
-        logo.grid(row=0, column=0, rowspan=2, padx=(0, 10))
+        self._crest_photo = None
+        if CREST_PATH.is_file():
+            try:
+                self._crest_photo = tk.PhotoImage(file=str(CREST_PATH))
+            except tk.TclError:
+                self._crest_photo = None
 
-        # Rounded teal square built from rectangles and four corner ovals.
-        logo.create_rectangle(0, 9, 44, 35, fill=TEAL, outline=TEAL)
-        logo.create_rectangle(9, 0, 35, 44, fill=TEAL, outline=TEAL)
-        for x0, y0 in ((0, 0), (28, 0), (0, 28), (28, 28)):
-            logo.create_oval(
-                x0, y0, x0 + 16, y0 + 16, fill=TEAL, outline=TEAL
+        if self._crest_photo is not None:
+            tk.Label(
+                brand, image=self._crest_photo, bg=NAVY
+            ).grid(row=0, column=0, rowspan=2, padx=(0, 10))
+        else:
+            # Fallback: the teal pill drawn with canvas primitives.
+            logo = tk.Canvas(
+                brand, width=44, height=44, bg=NAVY, highlightthickness=0
             )
-        # White capsule, split by a teal band.
-        logo.create_line(12, 31, 32, 13, fill="white", width=10, capstyle=tk.ROUND)
-        logo.create_line(20, 24, 26, 19, fill=TEAL, width=3)
+            logo.grid(row=0, column=0, rowspan=2, padx=(0, 10))
+            logo.create_rectangle(0, 9, 44, 35, fill=TEAL, outline=TEAL)
+            logo.create_rectangle(9, 0, 35, 44, fill=TEAL, outline=TEAL)
+            for x0, y0 in ((0, 0), (28, 0), (0, 28), (28, 28)):
+                logo.create_oval(
+                    x0, y0, x0 + 16, y0 + 16, fill=TEAL, outline=TEAL
+                )
+            logo.create_line(
+                12, 31, 32, 13, fill="white", width=10, capstyle=tk.ROUND
+            )
+            logo.create_line(20, 24, 26, 19, fill=TEAL, width=3)
 
         tk.Label(
             brand,
