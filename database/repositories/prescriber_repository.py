@@ -30,6 +30,27 @@ class PrescriberRepository:
         else:
             self.db = Database(database)
 
+    def list_all(
+        self, conn: Optional[sqlite3.Connection] = None
+    ) -> list[dict[str, Any]]:
+        """Return the allow-list as dicts with code and name.
+
+        Read-only helper used by the prescription service to populate the
+        GUI prescriber dropdown. SQL stays in this repository.
+        """
+        sql = (
+            "SELECT prescriber_code, prescriber_name "
+            "FROM authorised_prescribers ORDER BY prescriber_code"
+        )
+
+        if conn is not None:
+            rows = conn.execute(sql).fetchall()
+            return [dict(row) for row in rows]
+
+        with self.db.connection() as own_conn:
+            rows = own_conn.execute(sql).fetchall()
+            return [dict(row) for row in rows]
+
     def is_authorised(
         self, prescriber_code: str, conn: Optional[sqlite3.Connection] = None
     ) -> bool:
