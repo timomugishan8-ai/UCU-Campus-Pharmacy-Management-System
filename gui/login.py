@@ -412,5 +412,12 @@ def ask_for_login(services: Any) -> Optional[StaffUser]:
     # to mount its screens, but this gate is standalone, so pack the
     # screen so the form actually fills the window.
     screen.pack(fill="both", expand=True)
+
+    # Bring the gate to the front. Without this it can open behind VS Code
+    # or the browser and look as though the application did not start.
+    root.attributes("-topmost", True)
+    root.lift()
+    root.focus_force()
+
     root.mainloop()
     return services.current_user
