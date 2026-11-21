@@ -51,6 +51,10 @@ BUTTON_TEAL = "#4DB6AC"
 BUTTON_TEAL_ACTIVE = "#26A69A"
 WHITE = "#FFFFFF"
 LIGHT = "#F1F5F9"
+# Dark form panel (like the Alpha portal) with a white branding header.
+CARD_DARK = "#12161A"
+CARD_TEXT = "#E8EDF2"
+CARD_MUTED = "#9FB3C8"
 BORDER = "#CBD5E1"
 MUTED = "#64748B"
 TEXT = "#1F2937"
@@ -117,7 +121,11 @@ class LoginScreen(BaseScreen):
 
         # pack_propagate(False) means the card needs BOTH dimensions; with
         # only a width it collapses to 1x1 and the whole form is clipped.
-        card = tk.Frame(card_parent, bg=WHITE, width=480, height=510)
+        # 366px wide like the reference CSS; height is explicit because
+        # pack_propagate is off. Rounded corners are not a native tk.Frame
+        # feature, so the 6px radius is approximated by the card's padding
+        # and the flat dark panel.
+        card = tk.Frame(card_parent, bg=CARD_DARK, width=366, height=550)
         card.pack_propagate(False)
 
         self._build_brand_header(card)
@@ -171,7 +179,7 @@ class LoginScreen(BaseScreen):
         ).pack(side="right", padx=24)
 
     def _build_brand_header(self, card: tk.Widget) -> None:
-        header = tk.Frame(card, bg=WHITE, height=118)
+        header = tk.Frame(card, bg=WHITE, height=110)
         header.pack(fill="x")
         header.pack_propagate(False)
 
@@ -179,7 +187,7 @@ class LoginScreen(BaseScreen):
         logo = tk.Canvas(
             header, width=56, height=56, bg=WHITE, highlightthickness=0
         )
-        logo.pack(side="left", padx=(26, 12), pady=31)
+        logo.pack(side="left", padx=(16, 10), pady=27)
         logo.create_rectangle(0, 11, 56, 45, fill=TEAL, outline=TEAL)
         logo.create_rectangle(11, 0, 45, 56, fill=TEAL, outline=TEAL)
         for x0, y0 in ((0, 0), (36, 0), (0, 36), (36, 36)):
@@ -190,44 +198,50 @@ class LoginScreen(BaseScreen):
         logo.create_line(25, 30, 33, 24, fill=TEAL, width=4)
 
         names = tk.Frame(header, bg=WHITE)
-        names.pack(side="left", pady=(28, 0))
+        names.pack(side="left", pady=(22, 0))
         tk.Label(
             names,
             text="UGANDA CHRISTIAN UNIVERSITY",
             bg=WHITE,
             fg=NAVY,
-            font=("Segoe UI", 15, "bold"),
+            font=("Segoe UI", 11, "bold"),
+            wraplength=248,
+            justify="left",
         ).pack(anchor="w")
         tk.Label(
             names,
             text="A Centre of Excellence in the Heart of Africa",
             bg=WHITE,
             fg=PINK,
-            font=("Segoe UI", 9, "italic"),
+            font=("Segoe UI", 8, "italic"),
+            wraplength=248,
+            justify="left",
         ).pack(anchor="w", pady=(4, 0))
 
         tk.Frame(card, bg=TEAL, height=4).pack(fill="x")
 
     def _build_form(self, card: tk.Widget) -> None:
-        form = tk.Frame(card, bg=WHITE)
-        form.pack(fill="both", expand=True, padx=34, pady=(20, 12))
+        form = tk.Frame(card, bg=CARD_DARK)
+        form.pack(fill="both", expand=True, padx=20, pady=(16, 10))
 
         self.title_label = tk.Label(
             form,
             text="Welcome back",
-            bg=WHITE,
-            fg=TEXT,
-            font=("Segoe UI", 18, "bold"),
+            bg=CARD_DARK,
+            fg=CARD_TEXT,
+            font=("Segoe UI", 15, "bold"),
         )
         self.title_label.pack(anchor="w")
         self.subtitle_label = tk.Label(
             form,
             text="Sign in to continue to your pharmacy workspace",
-            bg=WHITE,
-            fg=MUTED,
-            font=("Segoe UI", 10),
+            bg=CARD_DARK,
+            fg=CARD_MUTED,
+            font=("Segoe UI", 9),
+            wraplength=320,
+            justify="left",
         )
-        self.subtitle_label.pack(anchor="w", pady=(2, 18))
+        self.subtitle_label.pack(anchor="w", pady=(2, 14))
 
         self.username_var = tk.StringVar()
         self.password_var = tk.StringVar()
@@ -239,7 +253,7 @@ class LoginScreen(BaseScreen):
             form, "Confirm password", self.confirm_var, True, 2
         )
 
-        actions = tk.Frame(form, bg=WHITE)
+        actions = tk.Frame(form, bg=CARD_DARK)
         actions.pack(fill="x", pady=(22, 0))
         self.actions_row = actions
         self.sign_in_button = BrandedButton(
@@ -278,21 +292,23 @@ class LoginScreen(BaseScreen):
         self.status_label = tk.Label(
             form,
             text="",
-            bg=WHITE,
-            fg="#B03A2E",
+            bg=CARD_DARK,
+            fg="#FF8A80",
             font=("Segoe UI", 9),
-            wraplength=460,
+            wraplength=320,
             justify="left",
         )
-        self.status_label.pack(anchor="w", pady=(12, 0))
+        self.status_label.pack(anchor="w", pady=(10, 0))
 
         tk.Label(
             form,
             text="By signing in, I agree to the system usage terms and conditions.",
-            bg=WHITE,
-            fg=MUTED,
+            bg=CARD_DARK,
+            fg=CARD_MUTED,
             font=("Segoe UI", 8),
-        ).pack(anchor="w", pady=(10, 0))
+            wraplength=320,
+            justify="left",
+        ).pack(anchor="w", pady=(8, 0))
 
         # Pressing Enter submits whichever action is currently enabled.
         self._bind_enter(self)
@@ -305,41 +321,43 @@ class LoginScreen(BaseScreen):
         secret: bool,
         row: int,
     ) -> tk.Frame:
-        wrapper = tk.Frame(parent, bg=WHITE)
-        wrapper.pack(fill="x", pady=(0, 10))
+        wrapper = tk.Frame(parent, bg=CARD_DARK)
+        wrapper.pack(fill="x", pady=(0, 8))
         tk.Label(
             wrapper,
             text=label.upper(),
-            bg=WHITE,
-            fg=NAVY,
+            bg=CARD_DARK,
+            fg=CARD_TEXT,
             font=("Segoe UI", 8, "bold"),
         ).pack(anchor="w")
         entry = tk.Entry(
             wrapper,
             textvariable=variable,
             show="*" if secret else "",
-            bg=LIGHT,
+            bg=WHITE,
             fg=TEXT,
             relief="flat",
             highlightthickness=1,
             highlightbackground=BORDER,
             highlightcolor=TEAL,
             font=("Segoe UI", 11),
-            width=38,
+            width=26,
         )
-        entry.pack(fill="x", pady=(3, 0), ipady=6)
+        entry.pack(fill="x", pady=(3, 0), ipady=5)
         return wrapper
 
     def _build_footer(self, card: tk.Widget) -> None:
-        footer = tk.Frame(card, bg=NAVY)
+        footer = tk.Frame(card, bg=CARD_DARK)
         footer.pack(fill="x", side="bottom")
         tk.Label(
             footer,
             text="© 2026 Uganda Christian University   -   Pharmacy Management System",
-            bg=NAVY,
-            fg="#9FB3C8",
-            font=("Segoe UI", 8),
-        ).pack(pady=9)
+            bg=CARD_DARK,
+            fg=CARD_MUTED,
+            font=("Segoe UI", 7),
+            wraplength=340,
+            justify="center",
+        ).pack(pady=8)
 
     def _bind_enter(self, widget: tk.Widget) -> None:
         for child in widget.winfo_children():
@@ -370,7 +388,7 @@ class LoginScreen(BaseScreen):
             )
             self.status_label.configure(
                 text="First run: choose a username and a strong password.",
-                fg=MUTED,
+                fg=CARD_MUTED,
             )
         else:
             self.sign_in_button.state(["!disabled"])
