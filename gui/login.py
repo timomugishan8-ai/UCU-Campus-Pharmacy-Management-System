@@ -44,6 +44,11 @@ NAVY_MID = "#153451"
 TEAL = "#16A085"
 PINK = "#E91E63"
 PINK_DARK = "#C2185B"
+# Softer, faded button colours (the tagline keeps the stronger pink).
+BUTTON_PINK = "#F48FB1"
+BUTTON_PINK_ACTIVE = "#EC407A"
+BUTTON_TEAL = "#4DB6AC"
+BUTTON_TEAL_ACTIVE = "#26A69A"
 WHITE = "#FFFFFF"
 LIGHT = "#F1F5F9"
 BORDER = "#CBD5E1"
@@ -112,7 +117,7 @@ class LoginScreen(BaseScreen):
 
         # pack_propagate(False) means the card needs BOTH dimensions; with
         # only a width it collapses to 1x1 and the whole form is clipped.
-        card = tk.Frame(card_parent, bg=WHITE, width=540, height=540)
+        card = tk.Frame(card_parent, bg=WHITE, width=480, height=510)
         card.pack_propagate(False)
 
         self._build_brand_header(card)
@@ -170,21 +175,22 @@ class LoginScreen(BaseScreen):
         header.pack(fill="x")
         header.pack_propagate(False)
 
-        crest = tk.Canvas(
-            header, width=74, height=74, bg=WHITE, highlightthickness=0
+        # The same teal pill logo used in the app sidebar, scaled up.
+        logo = tk.Canvas(
+            header, width=56, height=56, bg=WHITE, highlightthickness=0
         )
-        crest.pack(side="left", padx=(28, 14), pady=22)
-        # A simple shield/cross emblem drawn with canvas primitives.
-        crest.create_oval(6, 4, 68, 68, fill=TEAL, outline=NAVY, width=2)
-        crest.create_rectangle(33, 16, 41, 56, fill=WHITE, outline="")
-        crest.create_rectangle(18, 32, 56, 40, fill=WHITE, outline="")
-        crest.create_text(
-            37, 62, text="UCU", fill=GOLD,
-            font=("Segoe UI", 7, "bold"),
-        )
+        logo.pack(side="left", padx=(26, 12), pady=31)
+        logo.create_rectangle(0, 11, 56, 45, fill=TEAL, outline=TEAL)
+        logo.create_rectangle(11, 0, 45, 56, fill=TEAL, outline=TEAL)
+        for x0, y0 in ((0, 0), (36, 0), (0, 36), (36, 36)):
+            logo.create_oval(
+                x0, y0, x0 + 20, y0 + 20, fill=TEAL, outline=TEAL
+            )
+        logo.create_line(15, 39, 41, 16, fill=WHITE, width=13, capstyle=tk.ROUND)
+        logo.create_line(25, 30, 33, 24, fill=TEAL, width=4)
 
         names = tk.Frame(header, bg=WHITE)
-        names.pack(side="left", pady=(22, 0))
+        names.pack(side="left", pady=(28, 0))
         tk.Label(
             names,
             text="UGANDA CHRISTIAN UNIVERSITY",
@@ -240,9 +246,9 @@ class LoginScreen(BaseScreen):
             actions,
             text="SIGN IN  >",
             command=self.on_sign_in_clicked,
-            bg=PINK,
+            bg=BUTTON_PINK,
             fg=WHITE,
-            activebackground=PINK_DARK,
+            activebackground=BUTTON_PINK_ACTIVE,
             activeforeground=WHITE,
             relief="flat",
             borderwidth=0,
@@ -256,9 +262,9 @@ class LoginScreen(BaseScreen):
             actions,
             text="CREATE ADMINISTRATOR",
             command=self.on_create_first_admin_clicked,
-            bg=TEAL,
+            bg=BUTTON_TEAL,
             fg=WHITE,
-            activebackground="#0E7C68",
+            activebackground=BUTTON_TEAL_ACTIVE,
             activeforeground=WHITE,
             relief="flat",
             borderwidth=0,
