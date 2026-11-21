@@ -1,9 +1,10 @@
 """Fictional seed data for development and testing.
 
-This module inserts sample branches, medicines, stock rows and one
-authorised prescriber. It is safe to run more than once: every insert uses
-``INSERT OR IGNORE`` so existing rows are left untouched and no duplicates
-are created.
+This module inserts sample branches, medicines, stock rows and fictional
+demonstration authorised prescribers. The prescriber records are
+demonstration identities only and are not real licensed professionals.
+It is safe to run more than once: every insert uses ``INSERT OR IGNORE``
+so existing rows are left untouched and no duplicates are created.
 
 No real patient information is used. No database file is committed to Git;
 the caller decides where the database lives (use a temporary file for tests).
@@ -101,9 +102,16 @@ STOCK = [
     ("MED-019", 2, 30),
 ]
 
-# Fictional authorised prescriber (allow-list)
+# FICTIONAL DEMONSTRATION PRESCRIBERS ONLY.
+# These codes and names are demonstration identities. They are not real
+# licensed professionals and must not be represented as genuine authorised
+# prescribers.
 PRESCRIBERS = [
-    ("DR-1001", "Dr. A. Example"),
+    ("DR-1001", "Dr. Timothy (DEMO)"),
+    ("DR-1002", "Dr. Cindy (DEMO)"),
+    ("DR-1003", "Dr. Mulisa (DEMO)"),
+    ("DR-1004", "Dr. Matilda (DEMO)"),
+    ("DR-1005", "Dr. Conrad (DEMO)"),
 ]
 
 # A fictional UNAUTHORISED prescriber code for testing (deliberately not
