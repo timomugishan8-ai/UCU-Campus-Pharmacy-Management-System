@@ -37,6 +37,7 @@ from domain.user import StaffUser
 # (and GIF) with no Pillow. If the file is absent, the code-drawn navy
 # background is used instead, so the app never breaks on a fresh clone.
 HERO_PATH = Path(__file__).resolve().parent.parent / "assets" / "login_hero.png"
+UCU_LOGO_PATH = Path(__file__).resolve().parent.parent / "assets" / "ucu_logo.png"
 
 NAVY = "#0F2A43"
 NAVY_DARK = "#0A1E30"
@@ -183,40 +184,54 @@ class LoginScreen(BaseScreen):
         header.pack(fill="x")
         header.pack_propagate(False)
 
-        # The same teal pill logo used in the app sidebar, scaled up.
-        logo = tk.Canvas(
-            header, width=56, height=56, bg=WHITE, highlightthickness=0
-        )
-        logo.pack(side="left", padx=(16, 10), pady=27)
-        logo.create_rectangle(0, 11, 56, 45, fill=TEAL, outline=TEAL)
-        logo.create_rectangle(11, 0, 45, 56, fill=TEAL, outline=TEAL)
-        for x0, y0 in ((0, 0), (36, 0), (0, 36), (36, 36)):
-            logo.create_oval(
-                x0, y0, x0 + 20, y0 + 20, fill=TEAL, outline=TEAL
-            )
-        logo.create_line(15, 39, 41, 16, fill=WHITE, width=13, capstyle=tk.ROUND)
-        logo.create_line(25, 30, 33, 24, fill=TEAL, width=4)
+        # The real UCU logo lockup (crest + name + tagline), resized to fit
+        # the 366px card. PhotoImage is standard library; no Pillow needed.
+        self._ucu_photo = None
+        if UCU_LOGO_PATH.is_file():
+            try:
+                self._ucu_photo = tk.PhotoImage(file=str(UCU_LOGO_PATH))
+            except tk.TclError:
+                self._ucu_photo = None
 
-        names = tk.Frame(header, bg=WHITE)
-        names.pack(side="left", pady=(22, 0))
-        tk.Label(
-            names,
-            text="UGANDA CHRISTIAN UNIVERSITY",
-            bg=WHITE,
-            fg=NAVY,
-            font=("Segoe UI", 11, "bold"),
-            wraplength=248,
-            justify="left",
-        ).pack(anchor="w")
-        tk.Label(
-            names,
-            text="A Centre of Excellence in the Heart of Africa",
-            bg=WHITE,
-            fg=PINK,
-            font=("Segoe UI", 8, "italic"),
-            wraplength=248,
-            justify="left",
-        ).pack(anchor="w", pady=(4, 0))
+        if self._ucu_photo is not None:
+            tk.Label(header, image=self._ucu_photo, bg=WHITE).pack(expand=True)
+        else:
+            # Fallback: the teal pill logo drawn with canvas primitives.
+            logo = tk.Canvas(
+                header, width=56, height=56, bg=WHITE, highlightthickness=0
+            )
+            logo.pack(side="left", padx=(16, 10), pady=27)
+            logo.create_rectangle(0, 11, 56, 45, fill=TEAL, outline=TEAL)
+            logo.create_rectangle(11, 0, 45, 56, fill=TEAL, outline=TEAL)
+            for x0, y0 in ((0, 0), (36, 0), (0, 36), (36, 36)):
+                logo.create_oval(
+                    x0, y0, x0 + 20, y0 + 20, fill=TEAL, outline=TEAL
+                )
+            logo.create_line(
+                15, 39, 41, 16, fill=WHITE, width=13, capstyle=tk.ROUND
+            )
+            logo.create_line(25, 30, 33, 24, fill=TEAL, width=4)
+
+            names = tk.Frame(header, bg=WHITE)
+            names.pack(side="left", pady=(22, 0))
+            tk.Label(
+                names,
+                text="UGANDA CHRISTIAN UNIVERSITY",
+                bg=WHITE,
+                fg=NAVY,
+                font=("Segoe UI", 11, "bold"),
+                wraplength=248,
+                justify="left",
+            ).pack(anchor="w")
+            tk.Label(
+                names,
+                text="A Centre of Excellence in the Heart of Africa",
+                bg=WHITE,
+                fg=PINK,
+                font=("Segoe UI", 8, "italic"),
+                wraplength=248,
+                justify="left",
+            ).pack(anchor="w", pady=(4, 0))
 
         tk.Frame(card, bg=TEAL, height=4).pack(fill="x")
 

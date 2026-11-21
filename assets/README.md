@@ -16,3 +16,11 @@ fresh clone. No Pillow / third-party dependency is required.
 Only PNG and GIF are supported by `tk.PhotoImage`. JPEG files must be
 converted to PNG first. The original JPEG is kept outside the repository as
 a design reference and is not committed.
+
+## `ucu_logo.png`
+
+The official UCU logo lockup (crest + "UGANDA CHRISTIAN UNIVERSITY" +
+tagline) used in the white branding header of the login card. Supplied as
+`UCU_logo.PNG` in Downloads and resized to 334 x 84 px so it fits the
+366 px-wide card. If the file is missing, the login falls back to a
+Canvas-drawn teal pill logo.
