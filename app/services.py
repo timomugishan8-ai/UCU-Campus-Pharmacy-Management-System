@@ -6,11 +6,13 @@ from database.repositories.branch_repository import BranchRepository
 from database.repositories.stock_repository import StockRepository
 from database.repositories.prescription_repository import PrescriptionRepository
 from database.repositories.prescriber_repository import PrescriberRepository
+from database.repositories.user_repository import UserRepository
 
 from services.medicine_service import MedicineService
 from services.stock_service import StockService
 from services.prescription_service import PrescriptionService
 from services.report_service import ReportService
+from services.auth_service import AuthService
 
 
 class ApplicationServices:
@@ -27,6 +29,7 @@ class ApplicationServices:
         self.stock_repository = StockRepository(self.database)
         self.prescription_repository = PrescriptionRepository(self.database)
         self.prescriber_repository = PrescriberRepository(self.database)
+        self.user_repository = UserRepository(self.database)
 
         # 3. Create application services.
         self.medicine_service = MedicineService(
@@ -52,3 +55,11 @@ class ApplicationServices:
             stock_repository=self.stock_repository,
             database=self.database
         )
+
+        self.auth_service = AuthService(
+            user_repository=self.user_repository
+        )
+
+        # Set by the login gate (gui/login.py) before the main window
+        # opens; None means nobody is signed in yet.
+        self.current_user = None

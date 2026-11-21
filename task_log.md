@@ -39,6 +39,22 @@
 - **Follow-up (2026-11-20, branch `member-2-navigation-refresh`)**: after PR #7 merged and Timothy's `MainWindow` navigation landed, both of my screens now inherit `app.base_screen.BaseScreen` and expose the optional `refresh()` hook that `show_screen()` calls on navigation, so their catalogue, dropdowns and stock listings reload when the user switches screens; 2 navigation tests added (suite now 122). Conrad's `create_prescription.py` and `dispense.py` have the same gap (`ttk.Frame`, no `refresh()`) — flagged for him, not changed by me.
 - **Next steps**: joint GUI walkthrough with Member 4; watch Conrad's screens adopt `BaseScreen`/`refresh()` for consistency.
 
+## 2026-11-20 - Member 2 (Mulisa) - Staff accounts: administrator with sub-users
+
+- **Branch**: `member-2-auth` (proposal PR against `main`)
+- **Disclosure**: `docs/requirements.md` section 3.2 lists "User authentication, role-based access control or audit-log functionality" as out of scope. This branch is therefore a **proposal for group review**: it is additive (one new table, new files only), amends no requirement text, and touches shared files in the four places listed below so reviewers can assess the scope change consciously.
+- **Files added**
+  - `domain/user.py`: `StaffUser` (username, role `admin`/`staff`, active flag, read-only, **no password field ever**), `is_admin`, `from_dict`/`to_dict`, and the `UserError(ValueError)` hierarchy: `InvalidUserError`, `DuplicateUserError`, `AuthenticationError`, `AuthorizationError`.
+  - `database/repositories/user_repository.py`: parameterised SQL for `staff_users` with optional shared connection, mirroring the group's repository contract; `list_all()` never selects the password hash.
+  - `services/auth_service.py`: `has_users()`, `create_first_admin()`, `login()`, `create_user()`, `set_active()`, `list_users()`. Passwords hashed with PBKDF2-HMAC-SHA256 (100k iterations, random per-user salt) and verified with `hmac.compare_digest`; identical failure message for unknown user and wrong password; two safety rules: an administrator cannot disable their own account, and at least one active administrator must always remain.
+  - `gui/login.py`: `LoginScreen(parent, services)` + `ask_for_login()` gate run by `main.py` before `MainWindow`; first-run bootstrap ("Create the first administrator") instead of shipping a default password.
+  - `gui/user_admin.py`: `UserAdminScreen(BaseScreen)` with the `refresh()` navigation hook - account list, create sub-user, enable/disable; form greyed out for non-administrators while `AuthService` re-checks the actor authoritatively.
+  - `tests/test_auth.py`: 47 tests covering domain validation, password security (salt uniqueness, plain-text-never-stored), bootstrap-once, identical sign-in failure messages, role guards, both safety rules, DB UNIQUE/CHECK constraints, and both screens with mocked dialogs.
+- **Shared files touched (additive only)**: `database/schema.sql` (new `staff_users` table), `app/services.py` (`user_repository`, `auth_service`, `current_user`), `gui/main_window.py` (one sidebar entry), `main.py` (login gate before the main window).
+- **Tests**: `python -m unittest discover -s tests` -> 167 tests passed (120 existing + 47 new). Integration smoke: bootstrap -> login -> `MainWindow` -> "Users" navigation verified against a temporary database.
+- **Decisions**: bootstrap-first-admin instead of a seeded default password; passwords never enter the domain objects or the GUI beyond the input field; role checks live in the service (authoritative), the screen only reflects them (friendly).
+- **Next steps**: group review of the scope proposal (Timothy for requirements/architecture, Cindy for schema, Matilda for GUI conventions); if declined, the branch is dropped with no impact on `main`.
+
 ## 2026-11-18 - Member 3 (Conrad) - Prescription and dispensing
 
 - **Files changed**
