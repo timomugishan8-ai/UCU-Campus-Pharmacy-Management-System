@@ -17,9 +17,13 @@
 - Established integration guidelines to minimize coupling, avoid duplicated dependencies, and ensure consistency across members' implementations.
 - Prepared the integration and verification approach for reviewing, connecting, and testing individual components before final system delivery.
 
-## 2026-11-19 - Member 2 (Mulisa) - Medicine, branch and stock domain
+## Member 2 (Mulisa) - Medicine catalogue, staff accounts and seed data
 
-- **Branch**: `member-2-domain` (PR #7, merged into `main`); follow-up branch `member-2-navigation-refresh`
+All work by Member 2 in one place, organised by work package instead of by day.
+
+### WP1 - Medicine, branch and stock domain, service and GUI screens
+
+- **Branches**: `member-2-domain` (PR #7, merged into `main`); follow-up `member-2-navigation-refresh` (PR #11, merged into `main`)
 - **Files changed**
   - `domain/medicine.py`: abstract `Medicine` base with validated, read-only attributes; `OrdinaryMedicine` and `ControlledMedicine` overriding `requires_prescriber_code()`; `Medicine.create()` / `Medicine.from_dict()` subtype mapping; `MedicineError`, `InvalidMedicineError`, `DuplicateMedicineError` (all derive from `ValueError` for the GUI boundary).
   - `domain/branch.py`: `Branch` with `branch_id`/`branch_name`, validation, `from_dict`/`to_dict`.
@@ -30,30 +34,41 @@
   - `gui/receive_stock.py`: stock receipt screen; medicine/branch dropdowns; branch options sourced from `report_service.get_branch_stock_summary()` per the 2026-11-19 agreement so empty branches still appear; branch stock listing.
   - `tests/test_member2_gui.py`: 13 tkinter smoke tests driving both screens against a temporary database with `messagebox` mocked (no dialogs block the run).
 - **Feature**: medicine catalogue registration and lookup; branch and stock domain rules including per-branch quantities and the low-stock boundary (`quantity <= reorder_level`); medicine registration and stock receiving screens.
-- **Tests**: `py -m unittest discover -s tests` -> 120 tests passed (55 existing + 52 domain/service + 13 GUI); 122 after the navigation follow-up below.
 - **Decisions / confirmations**
   - MedicineService ownership confirmed as Member 2 per interface contract section 4 (supersedes the earlier task-allocation question).
   - MedicineService returns domain objects, not dictionaries; `Medicine.to_dict()` is available for screens that prefer row shape.
   - ReportService agreed formats verified as already implemented in `StockRepository.get_branch_stock_summary()`; Matilda's low-stock screen already sources its branch filter from the summary.
-  - No changes to shared interfaces, repositories or schema.
-- **Follow-up (2026-11-20, branch `member-2-navigation-refresh`)**: after PR #7 merged and Timothy's `MainWindow` navigation landed, both of my screens now inherit `app.base_screen.BaseScreen` and expose the optional `refresh()` hook that `show_screen()` calls on navigation, so their catalogue, dropdowns and stock listings reload when the user switches screens; 2 navigation tests added (suite now 122). Conrad's `create_prescription.py` and `dispense.py` have the same gap (`ttk.Frame`, no `refresh()`) — flagged for him, not changed by me.
-- **Next steps**: joint GUI walkthrough with Member 4; watch Conrad's screens adopt `BaseScreen`/`refresh()` for consistency.
+  - No changes to shared interfaces, repositories or schema in this work package.
+- **Navigation follow-up**: after PR #7 merged and Timothy's `MainWindow` navigation landed, both of my screens inherit `app.base_screen.BaseScreen` and expose the optional `refresh()` hook that `show_screen()` calls on navigation, so their catalogue, dropdowns and stock listings reload when the user switches screens; 2 navigation tests added. Conrad's `create_prescription.py` and `dispense.py` had the same gap (`ttk.Frame`, no `refresh()`) - flagged for him; Matilda's later navigation PR (#14) closed it.
 
-## 2026-11-20 - Member 2 (Mulisa) - Staff accounts: administrator with sub-users
+### WP2 - Staff accounts: administrator with sub-users
 
-- **Branch**: `member-2-auth` (proposal PR against `main`)
-- **Disclosure**: `docs/requirements.md` section 3.2 lists "User authentication, role-based access control or audit-log functionality" as out of scope. This branch is therefore a **proposal for group review**: it is additive (one new table, new files only), amends no requirement text, and touches shared files in the four places listed below so reviewers can assess the scope change consciously.
+- **Branch**: `member-2-auth` (PR #13, merged into `main`)
+- **Disclosure**: `docs/requirements.md` section 3.2 lists "User authentication, role-based access control or audit-log functionality" as out of scope. This work package was therefore a **proposal for group review**: it is additive (one new table, new files only), amends no requirement text, and touches shared files in the four places listed below so reviewers could assess the scope change consciously.
 - **Files added**
   - `domain/user.py`: `StaffUser` (username, role `admin`/`staff`, active flag, read-only, **no password field ever**), `is_admin`, `from_dict`/`to_dict`, and the `UserError(ValueError)` hierarchy: `InvalidUserError`, `DuplicateUserError`, `AuthenticationError`, `AuthorizationError`.
   - `database/repositories/user_repository.py`: parameterised SQL for `staff_users` with optional shared connection, mirroring the group's repository contract; `list_all()` never selects the password hash.
   - `services/auth_service.py`: `has_users()`, `create_first_admin()`, `login()`, `create_user()`, `set_active()`, `list_users()`. Passwords hashed with PBKDF2-HMAC-SHA256 (100k iterations, random per-user salt) and verified with `hmac.compare_digest`; identical failure message for unknown user and wrong password; two safety rules: an administrator cannot disable their own account, and at least one active administrator must always remain.
-  - `gui/login.py`: `LoginScreen(parent, services)` + `ask_for_login()` gate run by `main.py` before `MainWindow`; first-run bootstrap ("Create the first administrator") instead of shipping a default password.
+  - `gui/login.py`: `LoginScreen(parent, services)` + `ask_for_login()` gate run by `main.py` before `MainWindow`; first-run bootstrap ("Create the first administrator") instead of shipping a default password. The login card was later restyled by Member 4 (UCU branding, hero image) with the class and gate behaviour intact.
   - `gui/user_admin.py`: `UserAdminScreen(BaseScreen)` with the `refresh()` navigation hook - account list, create sub-user, enable/disable; form greyed out for non-administrators while `AuthService` re-checks the actor authoritatively.
-  - `tests/test_auth.py`: 47 tests covering domain validation, password security (salt uniqueness, plain-text-never-stored), bootstrap-once, identical sign-in failure messages, role guards, both safety rules, DB UNIQUE/CHECK constraints, and both screens with mocked dialogs.
+  - `tests/test_auth.py`: 47 tests covering domain validation, password security (salt uniqueness, plain-text-never-stored), bootstrap-once, identical sign-in failure messages, role guards, both safety rules, DB UNIQUE/CHECK constraints, both screens with mocked dialogs, and the gate-packing regression test.
 - **Shared files touched (additive only)**: `database/schema.sql` (new `staff_users` table), `app/services.py` (`user_repository`, `auth_service`, `current_user`), `gui/main_window.py` (one sidebar entry), `main.py` (login gate before the main window).
-- **Tests**: `python -m unittest discover -s tests` -> 167 tests passed (120 existing + 47 new). Integration smoke: bootstrap -> login -> `MainWindow` -> "Users" navigation verified against a temporary database.
+- **Tests**: `python -m unittest discover -s tests` -> 167 tests passed at merge (120 existing + 47 new). Integration smoke: bootstrap -> login -> `MainWindow` -> `Users` navigation verified against a temporary database.
 - **Decisions**: bootstrap-first-admin instead of a seeded default password; passwords never enter the domain objects or the GUI beyond the input field; role checks live in the service (authoritative), the screen only reflects them (friendly).
-- **Next steps**: group review of the scope proposal (Timothy for requirements/architecture, Cindy for schema, Matilda for GUI conventions); if declined, the branch is dropped with no impact on `main`.
+
+### WP3 - Ugandan medicine catalogue in seed data
+
+- **Branch**: `member-2-seed-medicines` (PR pending against `main`)
+- **Motivation**: the demo catalogue held only 5 medicines. Extended it with 21 more commonly used in Uganda so the Register Medicine, Receive Stock, Low Stock and prescription screens show a realistic pharmacy.
+- **Files changed**
+  - `database/seed_data.py`: `MEDICINES` grew from 5 to 26 rows (`MED-006`..`MED-026`) grouped by use: malaria (Coartem, Fansidar, Quinine), antibiotics (Metronidazole, Cotrimoxazole, Ciprofloxacin), pain (Diclofenac, Tramadol), gastro (Omeprazole), child health (ORS, Zinc, Paracetamol syrup), deworming/ANC (Albendazole, Ferrous sulphate + Folic acid), chronic care (Amlodipine, Metformin, Prednisolone), respiratory (Salbutamol inhaler), TB/HIV (Rifampicin/Isoniazid, Tenofovir/Lamivudine/Dolutegravir) and a codeine cough syrup. Controlled flag set on Tramadol and codeine syrup alongside the existing Morphine and Diazepam (4 controlled total). `STOCK` grew from 8 to 33 rows: full range at branch 1, faster-moving lines at branch 2, and four deliberate low-stock examples (Paracetamol, Fansidar, Salbutamol, codeine syrup) for the Low Stock screen. All names fictionalised/generic; prices follow the existing seed scale.
+  - `tests/test_member5_database.py`: `test_seed_idempotency` now compares counts against `len(BRANCHES/MEDICINES/STOCK/PRESCRIBERS)` instead of hardcoded 2/5/8/1. The test still proves its original property (seeding twice leaves exactly one copy of every row) but no longer breaks whenever seed data is extended. Member 5's test intent unchanged; only the expected values became self-referential.
+- **Note**: the existing local `data/pharmacy.db` picks the new rows up on the next run because the seed uses `INSERT OR IGNORE` - no database file is committed to Git.
+
+### Test record and working practices
+
+- Suite progression through Member 2's work: 55 (baseline) -> 120 -> 122 -> 167 -> 178 (current `main`).
+- Full suite green before every push; targeted `git add` only (never `-A`); one branch per feature with a pull request; shared-file changes disclosed in the task log.
 
 ## 2026-11-18 - Member 3 (Conrad) - Prescription and dispensing
 
