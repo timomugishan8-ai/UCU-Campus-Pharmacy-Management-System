@@ -27,10 +27,16 @@ from __future__ import annotations
 
 import tkinter as tk
 from tkinter import messagebox
+from pathlib import Path
 from typing import Any, Optional
 
 from app.base_screen import BaseScreen
 from domain.user import StaffUser
+
+# Optional PNG hero background. Standard-library PhotoImage can read PNG
+# (and GIF) with no Pillow. If the file is absent, the code-drawn navy
+# background is used instead, so the app never breaks on a fresh clone.
+HERO_PATH = Path(__file__).resolve().parent.parent / "assets" / "login_hero.png"
 
 NAVY = "#0F2A43"
 NAVY_DARK = "#0A1E30"
@@ -86,10 +92,27 @@ class LoginScreen(BaseScreen):
         centre = tk.Frame(background, bg=NAVY_DARK)
         centre.pack(fill="both", expand=True)
 
+        # Decide the hero first: the card must be created as a DESCENDANT of
+        # the canvas when a PNG is used, because create_window() cannot
+        # embed a sibling widget.
+        self._hero_photo = None
+        if HERO_PATH.is_file():
+            try:
+                self._hero_photo = tk.PhotoImage(file=str(HERO_PATH))
+            except tk.TclError:
+                self._hero_photo = None  # unreadable file: fall back safely
+
+        if self._hero_photo is not None:
+            hero = tk.Canvas(centre, bg=NAVY_DARK, highlightthickness=0)
+            hero.pack(fill="both", expand=True)
+            card_parent: tk.Widget = hero
+        else:
+            hero = None
+            card_parent = centre
+
         # pack_propagate(False) means the card needs BOTH dimensions; with
         # only a width it collapses to 1x1 and the whole form is clipped.
-        card = tk.Frame(centre, bg=WHITE, width=540, height=540)
-        card.pack(pady=(6, 18))
+        card = tk.Frame(card_parent, bg=WHITE, width=540, height=540)
         card.pack_propagate(False)
 
         self._build_brand_header(card)
@@ -97,6 +120,31 @@ class LoginScreen(BaseScreen):
         # squeeze it out of the card.
         self._build_footer(card)
         self._build_form(card)
+
+        if hero is not None:
+
+            def _paint_hero(_event: Any = None) -> None:
+                w, h = hero.winfo_width(), hero.winfo_height()
+                hero.delete("hero")
+                hero.create_image(
+                    w // 2, h // 2,
+                    image=self._hero_photo, anchor="center", tags="hero",
+                )
+                # A stippled navy wash keeps the white card legible.
+                hero.create_rectangle(
+                    0, 0, w, h, fill=NAVY_DARK, stipple="gray25",
+                    tags="hero",
+                )
+                hero.create_window(
+                    w // 2, h // 2, window=card, anchor="center",
+                    tags="hero",
+                )
+
+            hero.bind("<Configure>", _paint_hero)
+            _paint_hero()
+        else:
+            # No PNG asset: the code-drawn navy background.
+            card.pack(pady=(6, 18))
 
     def _build_top_bar(self, parent: tk.Widget) -> None:
         bar = tk.Frame(parent, bg=NAVY, height=46)
